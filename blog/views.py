@@ -141,6 +141,7 @@ def add_results(request):
     else:
         return redirect('login')
 
+
 #This function returns the Statistics page view.
 def statistics(request):
     data = Game.get_player_data()
