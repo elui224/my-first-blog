@@ -1,0 +1,66 @@
+{% load staticfiles %}
+
+
+<html>
+
+	<head>
+		
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/blog.css' %}">
+
+		<title>{% block head_title %}My Website{% endblock head_title %}</title>
+
+	</head>
+
+	<body>
+		<div class = "page-header">
+
+				{% if user.is_authenticated %}
+				    <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+				{% endif %}
+
+			<h1><a href="{% url 'post_list'%}">hello world</a></h1>	
+
+		</div>
+    
+
+		<div class="content container-fluid">
+
+
+		    <div class="row">
+		    	
+
+		    	<div class="side-nav col-md-2 .col-md-pull-9">	 
+		    		{% include 'blog/side_nav_bar.html' %} 
+				</div>
+
+				<div class="clearfix visible-xs-block"></div>
+
+		        <div class="col-md-8 .col-md-push-3">
+
+		        	{% include 'blog/messages_error_template.html' %}
+
+		            {% block content %}
+
+		            {% endblock %}
+
+		        </div>
+		    </div>
+		</div>
+
+
+		{% include 'blog/js.html' %}
+
+
+	<script>
+		$(document).ready(function(){
+			{% block jquery %}{% endblock %}
+		})
+	</script>
+
+
+	</body>
+</html>
+

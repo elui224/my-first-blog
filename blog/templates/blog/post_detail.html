@@ -1,0 +1,44 @@
+{% extends 'blog/base.html' %}
+
+{% block head_title %} {{block.super}} | {{ post.title }} {% endblock head_title %}
+
+{% block content %}
+
+<!--         {% if post.published_date %}
+
+        {% endif %} -->
+        {% if user.is_authenticated %}
+            <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><span class="glyphicon glyphicon-pencil"></span></a>
+        {% endif %}
+
+        <div>
+
+        {%if post.image %}
+            <img src='{{post.image.url}}' width="{{ post.image.width }}" height="{{ post.image.height }}"class='img-responsive' />
+        {% endif %}
+
+        <div>
+
+
+        
+        <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
+        <p><a href="/">{{post.author.first_name}}</a></p>
+        <div class="date">
+            <p>published: {{ post.publish_date |timesince }} ago</p>
+        </div>
+
+        <div class="img">{{ post.get_html }}</div>
+
+        {% include 'blog/js.html' %}
+        <script type="text/javascript">
+
+        {% block jquery %}
+
+            $(".img").each(function() {              
+                $(this).addClass("img-responsive");
+            })
+
+        {% endblock %}
+        </script>
+
+{% endblock %}

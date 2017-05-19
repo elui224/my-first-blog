@@ -1,0 +1,16 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head_title %} {{block.super}} | Update {% endblock head_title %}
+
+{% block content %}
+
+    <h2><a>Add/Edit Post</a></h2>
+
+    <form method="POST" enctype="multipart/form-data" class="post-form">
+    	{% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="save btn btn-success">Save</button>
+    </form>
+
+{% endblock %}

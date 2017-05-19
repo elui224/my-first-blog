@@ -1,0 +1,115 @@
+
+{% extends 'blog/base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+
+
+{% block head_title %} {{block.super}} | Add Results {% endblock head_title %}
+
+	{% block content %}
+
+	<h1><a>{% block title %}Add Results{% endblock %}</a></h1> 
+
+	<div>
+
+	<form method="POST" action="{% url 'add_results' %}">
+
+		{% csrf_token %}
+
+		{{ form|crispy }}
+
+	
+	<table id='goal_set' class="table">
+
+		
+		{{ formset.management_form }}
+		
+	<div class="row">
+	{% if formset.non_form_errors %}
+        {% for error in formset.non_form_errors %}
+            {{ error|escape }}
+        {% endfor %}
+    {% endif %}
+	</div>
+
+
+		{% for goal_form in formset %}
+		
+	        {% if forloop.first %}
+	        <thead>
+	        <tr>
+	            {% for field in goal_form.visible_fields %}
+	                <th>{{ field.label_tag }}</th>
+	            {% endfor %}
+	        </tr>
+	        </thead>
+	        {% endif %}
+		    
+		    <tbody>
+		    <tr class='rowset_row'>
+	            {% for field in goal_form.visible_fields %}
+	                <td>
+	                	{% if forloop.first %}
+
+	                		{%  for hidden in goal_form.hidden_fields %}{{ hidden }}{% endfor %}
+	                		{% if goal_form.instance.pk %}{{ goal_form.DELETE }}{% endif %}
+
+	                	{% endif %}
+
+	                	{{ field }}
+
+	                </td>    
+
+	            {% endfor %}
+	        </tr>		
+			</tbody>
+		
+		{% endfor %}
+
+	</table>
+
+	<input type="submit" class="btn btn-success" value="Add Result" />
+	</form>
+
+
+	<hr>
+
+	{% if game %}
+
+	<h1><a>Game Log - Last 10 Games</a></h2>
+	<div class="table-responsive">
+		<table class='table'>
+			{% for instance in game %}
+			
+				<tr>
+					<td> {{forloop.revcounter}} </td><td>{{instance.your_first_name}} vs {{instance.opponent_first_name}}</td><td>result: {{instance.your_score}} - {{instance.opponent_score}}</td><td>{{instance.season_number}}</td>
+				</tr>
+
+			{% endfor %}
+		</table>
+	</div>
+
+	{% endif %}
+
+
+	</div>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="{% static 'js/jquery.formset.js' %}"></script>
+	<script type="text/javascript">
+
+	    $('.rowset_row').formset({
+	        addText: 'add goal',
+	        deleteText: 'remove',
+	        prefix: 'goal_set'
+	    });
+
+	</script>
+
+
+{% endblock %}
+
+
+
+

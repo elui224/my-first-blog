@@ -1,0 +1,23 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head_title %} {{block.super}} | Login {% endblock head_title %}
+
+	{% block content %}
+
+
+
+	<h2><a>{% block title %}Please sign in{% endblock %}</a></h2>
+
+	<form class="form-signin" method="post" action="{% url 'login' %}">
+	{% csrf_token %}
+
+		{{ form|crispy }}
+
+
+	<input class="btn btn-success" type="submit" value="login" />
+	<input type="hidden" name="next" value="{{ next_page }}" />
+	</form>
+
+
+{% endblock %}
