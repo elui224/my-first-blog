@@ -37,3 +37,10 @@ class GoalModelAdmin(admin.ModelAdmin):
 	list_display = ["player_name","game","num_goals"]
 	class Meta:
 		model = Goal
+
+admin.site.register(Team, TeamModelAdmin)
+admin.site.register(Player, PlayerModelAdmin)
+admin.site.register(Year, YearModelAdmin)
+admin.site.register(Season, SeasonModelAdmin)
+admin.site.register(Game, GameModelAdmin)
+admin.site.register(Goal, GoalModelAdmin)

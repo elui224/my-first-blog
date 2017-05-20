@@ -53,7 +53,7 @@ def post_detail(request, slug):
 
 #This function opens a form to easily edit blog posts. Create.
 def post_new(request):
-    if request.user.is_authenticated():
+    if request.user.is_staff or request.user.is_superuser:
         if request.method == "POST":
             form = PostForm(request.POST, request.FILES or None)
 
@@ -74,7 +74,7 @@ def post_new(request):
 
 #This functions allows blog views to be editable. Update.
 def post_edit(request, slug):
-    if request.user.is_authenticated():
+    if request.user.is_staff or request.user.is_superuser:
         post = get_object_or_404(Post, slug=slug)
 
         if request.method == "POST":

@@ -81,7 +81,7 @@ function renderChart() {
 		<canvas id="myChart" width="400" height="400"></canvas>
 	</div>
 
-{% if user.is_authenticated %}
+{% if user.is_staff or user.is_superuser %}
 	{{data}}
 {% endif %}
 

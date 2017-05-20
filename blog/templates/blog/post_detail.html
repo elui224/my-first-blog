@@ -7,7 +7,7 @@
 <!--         {% if post.published_date %}
 
         {% endif %} -->
-        {% if user.is_authenticated %}
+        {% if user.is_staff or user.is_superuser %}
             <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><span class="glyphicon glyphicon-pencil"></span></a>
         {% endif %}
 

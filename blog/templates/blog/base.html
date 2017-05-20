@@ -17,7 +17,7 @@
 	<body>
 		<div class = "page-header">
 
-				{% if user.is_authenticated %}
+				{% if user.is_staff or user.is_superuser %}
 				    <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
 				{% endif %}
 
