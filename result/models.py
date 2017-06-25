@@ -73,26 +73,38 @@ class Season(models.Model):
 
 #Returns the current season based on number of games played to display.
 def get_default_season_number(): 
+	active_teams_count = Team.get_active_teams_count()
+	season_games_against_opponent = 2
+	opponents_per_season = active_teams_count - 1
+	total_games_per_season = active_teams_count * season_games_against_opponent * opponents_per_season / 2
+
 	season_qs = Season.objects.all()
 	season_exists = season_qs.exists()
+
 	if season_exists:
-		current_season_number = Season.objects.all().aggregate(Max('season_number'))['season_number__max']
+		prev_season_object = Season.objects.all().order_by('-season_number')[1]
 		current_season_object = Season.objects.latest('season_number')
-		active_teams_count = Team.get_active_teams_count()
+
+		current_season_number = Season.objects.all().aggregate(Max('season_number'))['season_number__max']
+		prev_season_game_count = Game.objects.filter(season_number__season_number = current_season_number - 1).count()
 		current_season_game_count = Game.objects.filter(season_number__season_number = current_season_number ).count()
-		season_games_against_opponent = 2
-		opponents_per_season = active_teams_count - 1
-		total_games_per_season = active_teams_count * season_games_against_opponent * opponents_per_season / 2
-		if season_exists and current_season_game_count < total_games_per_season:
+		
+		if prev_season_game_count < total_games_per_season:
+			default_season_number = prev_season_object
+
+		elif current_season_game_count < total_games_per_season:
 			default_season_number = current_season_object
+
 		else:
 			#create new instance of Season. Increment default_season_number by 1.
 			current_fifa_year_id = Year.objects.latest('id') 
 			next_season = current_season_number + 1
 			Season.objects.create(season_number=next_season, fifa_year=current_fifa_year_id)
 			default_season_number = current_season_object
+			
 	else:
 		default_season_number = None
+
 	return default_season_number
 
 
@@ -210,3 +222,6 @@ class Goal(models.Model):
 
 	def __str__(self):
 		return '{} {}'.format("Game",self.game) 
+
+
+

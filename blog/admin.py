@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Post, Team, Player, Year, Season, Game, Goal
 
+
 # This customizes the admin panel.
 class PostModelAdmin(admin.ModelAdmin):
 	list_display = ["title","created_date"]

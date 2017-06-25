@@ -3,6 +3,9 @@ from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from .models import Post, Game, Player, Goal, Season
 
+from crispy_forms.helper import FormHelper
+
+
 
 class PostForm(forms.ModelForm):
 
@@ -48,6 +51,12 @@ class GoalForm(forms.ModelForm):
 			'num_goals': 'Total Goals',
 		}
 
+	def __init__(self, *args, **kwargs):
+		self.helper = FormHelper()
+		self.helper.form_tag = False
+		super(GoalForm, self).__init__(*args, **kwargs)
+
+
 class BaseGoalFormSet(BaseInlineFormSet):
 
 	def clean(self, *args, **kwargs):
@@ -72,5 +81,6 @@ class BaseGoalFormSet(BaseInlineFormSet):
 
 		except AttributeError:
 			pass
+
 
 

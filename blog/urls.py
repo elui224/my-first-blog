@@ -5,7 +5,6 @@ from django.contrib.auth import views as auth_views
 from . import views
 from .views import ChartData
 
-# app_name = 'blog'
 
 urlpatterns = [
     url(r'^$', views.post_list, name='post_list'),
