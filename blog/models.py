@@ -1,5 +1,6 @@
 
 import datetime
+from datetime import date
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Sum, Count
@@ -82,6 +83,14 @@ class Team(models.Model):
 		(INACTIVE, 'Inactive')
 		)
 	rec_status = models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+	team_image = models.ImageField(upload_to=img_upload_location,
+		null = True,
+		blank = True, 
+		height_field = "height_field", 
+		width_field = "width_field")
+	height_field = models.IntegerField(default=0, null=True, blank = True)
+	width_field = models.IntegerField(default=0, null=True, blank = True)
+	profile_text = models.TextField(null = True, blank = True)
 
 	def __str__(self):
 		return self.manager_name
@@ -99,6 +108,15 @@ class Team(models.Model):
 class Player(models.Model):
 	team = models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
 	player_name = models.CharField(max_length = 100)
+	player_position = models.CharField(max_length = 4, null = True, blank = True)
+	ACTIVE = 'A'
+	INACTIVE = 'I'
+	STATUS_CHOICES = (
+		(ACTIVE, 'Active'),
+		(INACTIVE, 'Inactive')
+		)
+	player_team_rec_status = models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+
 
 	def __str__(self):
 		return str(self.player_name)
@@ -119,7 +137,8 @@ def get_current_year_number():
 	if year_exists:
 		current_year_object = Year.objects.latest('fifa_year')
 		now = timezone.now()
-		fifa_release_date = datetime.date(day=26, year=2017, month=9)  #release date of fifa18. Setting release date needs work.
+		fifa_release_year = date.today().year
+		fifa_release_date = datetime.date(year=fifa_release_year, month=9, day=1)  #release date of fifa18. Setting release date needs work.
 		if now == fifa_release_date:
 			current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
 			next_fifa_year = current_fifa_year + 1
@@ -139,8 +158,9 @@ class Season(models.Model):
 		return '{} {}'.format('Season', self.season_number)
 
 
-#Returns the current season based on number of games played to display.
+
 def get_default_season_number(): 
+#Returns the current season based on number of games played to display.
 	active_teams_count = Team.get_active_teams_count()
 	season_games_against_opponent = 2
 	opponents_per_season = active_teams_count - 1

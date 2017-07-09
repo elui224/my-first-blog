@@ -4,7 +4,6 @@
 <html>
 
 	<head>
-		
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">		
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -18,10 +17,11 @@
 		<div class = "page-header">
 
 				{% if user.is_staff or user.is_superuser %}
-				    <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+				    <a href="{% url 'post_new' %}" class="top-menu"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
 				{% endif %}
 
 			<h1><a href="{% url 'post_list'%}">hello world</a></h1>	
+			<p href="{% url 'post_list'%}" class="site-description" itemprop="description"> welcome to the FIFA lounge <i class="fa fa-futbol-o fa-2x" aria-hidden="true"></i></p>
 
 		</div>
     
@@ -50,6 +50,11 @@
 		    </div>
 		</div>
 
+	<footer class="footer">
+		<div class="">
+			<p class="muted"><a href="#">Back to the top</a></p>
+		</div>
+	</footer>
 
 		{% include 'blog/js.html' %}
 

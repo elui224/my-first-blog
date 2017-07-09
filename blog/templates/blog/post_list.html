@@ -1,46 +1,48 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-
-    
+  
 
         <div>
             <form method = 'GET' action=''>
-                <div class='input-group'>
-                    <input type='text' name='search_query' placeholder='Search posts' value='{{ request.GET.search_query }}'/>
-                    <!-- <input class='btn btn-primary' type='submit' value='Search' /> -->
-                    <button class='btn btn-default' type='submit'><i class="fa fa-search"></i></button>
+                <div class='input-group'>                   
+                    <input class="form-control" type='text' name='search_query' placeholder='Search posts' value='{{ request.GET.search_query }}'/>
+                    <span class="input-group-addon"><i class="fa fa-search fa-fw"></i></span>
+                    <!-- <button class='btn btn-default' type='submit'><i class="fa fa-search" aria-hidden="true"></i></button> -->
                 </div>
         </div>
 
 
     {% for post in posts %}
 
-        <div class="thumbnail">
+        <div class="">
             {%if post.image %}
-            <img src='{{post.image.url}}' class='img-responsive' />
+            <a href="{% url 'post_detail' slug=post.slug %}">
+            <img src='{{post.image.url}}' class='img-responsive'/>
+            </a>
             {% endif %}
             <div class="caption">
 
                 <h2><a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
-                <a href="{% url 'post_new'%}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
-                <p><a href="/">{{post.author.first_name}}</a></p>
+               
+                <p>Author: <a href="/">{{post.author.first_name}}</a></p>
                 <div class="date">
                     <p>published: {{ post.publish_date | timesince }} ago</p>
                 </div>
-                <p>{{ post.get_html|truncatechars:250 }}</p>
-                <p><a href="{% url 'post_detail' slug=post.slug %}" class="btn btn-primary" role="button">more info</a></p>
+                <p>{{ post.get_html|truncatechars:500 }}</p>
+                <p><a href="{% url 'post_detail' slug=post.slug %}" <i class="fa fa-ellipsis-h" aria-hidden="true"></i></a></p>
 
             </div>
 
         </div>
+        <hr>
         
     {% endfor %}
 
 <div class="pagination">
     <span class="step-links">
         {% if posts.has_previous %}
-            <a href="?page={{ posts.previous_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">previous</a>
+            <a class="btn btn-primary btn-small" href="?page={{ posts.previous_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">previous</a>
         {% endif %}
 
         <span class="current">
@@ -48,9 +50,23 @@
         </span>
 
         {% if posts.has_next %}
-            <a href="?page={{ posts.next_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">next</a>
+            <a class="btn btn-primary btn-small" role="button" href="?page={{ posts.next_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">next</a>
         {% endif %}
     </span>
 </div>
+
+{% include 'blog/js.html' %}
+<script type="text/javascript">
+
+{% block jquery %}
+
+    $(document).ready(function(){
+        $(".content-markdown img").each(function(){
+            $(this).addClass("img-responsive")
+        })
+    }
+
+{% endblock %}
+</script>
 
 {% endblock %}		        

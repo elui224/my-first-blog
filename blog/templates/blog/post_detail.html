@@ -4,17 +4,14 @@
 
 {% block content %}
 
-<!--         {% if post.published_date %}
-
-        {% endif %} -->
         {% if user.is_staff or user.is_superuser %}
-            <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         {% endif %}
 
         <div>
 
         {%if post.image %}
-            <img src='{{post.image.url}}' width="{{ post.image.width }}" height="{{ post.image.height }}"class='img-responsive' />
+            <img href="{% url 'post_detail' slug=post.slug %}" src='{{post.image.url}}' width="{{ post.image.width }}" height="{{ post.image.height }}" class='img-responsive' />
         {% endif %}
 
         <div>
@@ -22,7 +19,7 @@
 
         
         <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
-        <p><a href="/">{{post.author.first_name}}</a></p>
+        <p>Author: <a href="/">{{post.author.first_name}}</a></p>
         <div class="date">
             <p>published: {{ post.publish_date |timesince }} ago</p>
         </div>
@@ -34,9 +31,11 @@
 
         {% block jquery %}
 
-            $(".img").each(function() {              
-                $(this).addClass("img-responsive");
-            })
+            $(document).ready(function(){
+                $(".content-markdown img").each(function(){
+                    $(this).addClass("img-responsive")
+                })
+            }
 
         {% endblock %}
         </script>

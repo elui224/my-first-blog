@@ -51,10 +51,6 @@ class GoalForm(forms.ModelForm):
 			'num_goals': 'Total Goals',
 		}
 
-	def __init__(self, *args, **kwargs):
-		self.helper = FormHelper()
-		self.helper.form_tag = False
-		super(GoalForm, self).__init__(*args, **kwargs)
 
 
 class BaseGoalFormSet(BaseInlineFormSet):
@@ -77,7 +73,6 @@ class BaseGoalFormSet(BaseInlineFormSet):
 						if player_name in player_names:
 							raise forms.ValidationError('Goal scorers must be unique.')
 						player_names.append(player_name)
-
 
 		except AttributeError:
 			pass

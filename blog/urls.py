@@ -18,6 +18,7 @@ urlpatterns = [
 	url(r'^statistics/$', views.statistics, name='statistics'),
 	url(r'^api/chart/data/$', ChartData.as_view()),
 	url(r'^add_results/$', views.add_results, name='add_results'),
+	url(r'^result/(?P<pk>[0-9]+)/$', views.edit_results, name='edit_results'),
 
 ]
 
