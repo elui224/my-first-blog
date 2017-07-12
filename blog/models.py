@@ -1,6 +1,6 @@
 
-import datetime
-from datetime import date
+from datetime import datetime
+# from datetime import date
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Max, Sum, Count
@@ -136,17 +136,18 @@ def get_current_year_number():
 	year_exists = year_qs.exists()
 	if year_exists:
 		current_year_object = Year.objects.latest('fifa_year')
-		now = timezone.now()
-		fifa_release_year = date.today().year
-		fifa_release_date = datetime.date(year=fifa_release_year, month=7, day=12)  #release date of fifa18. Setting release date needs work.
-		if now == fifa_release_date:
-			current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
+		set_action_date = "2017-07-12 16:55:00" #yyyy/mm/dd h:m:s  #release date of fifa18.
+		date_format = "%Y-%m-%d %H:%M:%S"
+		now = datetime.now().strftime(date_format)
+		# fifa_release_date = datetime.strptime(set_action_date, date_format) 
+		current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
+		if datetime.now().strftime(date_format) == set_action_date:
 			next_fifa_year = current_fifa_year + 1
 			Year.objects.create(fifa_year=next_fifa_year)
-			current_year_object = Year.objects.latest('fifa_year')
+			default_year_object = current_year_object
 	else:
-		current_year_object = Year.objects.create(fifa_year=1)
-	return current_year_object
+		default_year_object = Year.objects.create(fifa_year=1)
+	return default_year_object
 
 
 

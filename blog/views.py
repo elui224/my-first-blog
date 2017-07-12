@@ -145,7 +145,7 @@ def add_results(request):
 
 #This functions allows result views to be editable. Update.
 def edit_results(request, pk):
-    if request.user.is_staff or request.user.is_superuser:
+    if request.user.is_authenticated():
         game = get_object_or_404(Game, pk=pk)
         GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
         formset = GoalFormSet(instance=game)
