@@ -75,7 +75,7 @@ pre_save.connect(pre_save_post_receiver, sender=Post)
 
 
 class Team(models.Model):
-	manager_name = models.CharField(max_length = 50)
+	manager_name = models.CharField(max_length = 50, default = None)
 	ACTIVE = 'A'
 	INACTIVE = 'I'
 	STATUS_CHOICES = (
@@ -138,7 +138,7 @@ def get_current_year_number():
 		current_year_object = Year.objects.latest('fifa_year')
 		now = timezone.now()
 		fifa_release_year = date.today().year
-		fifa_release_date = datetime.date(year=fifa_release_year, month=9, day=1)  #release date of fifa18. Setting release date needs work.
+		fifa_release_date = datetime.date(year=fifa_release_year, month=7, day=12)  #release date of fifa18. Setting release date needs work.
 		if now == fifa_release_date:
 			current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
 			next_fifa_year = current_fifa_year + 1

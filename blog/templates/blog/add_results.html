@@ -8,7 +8,13 @@
 
 	{% block content %}
 
+
+<div>
+	<h2><a>Read Me</a></h2> 
+		<p>To record the results of a game, complete the required fields (*) and click Add Result. Note that adding goal scorers-- Goal Scorer and Total Goals-- is not required. However, if you provide a Goal Scorer you must provide the corresponding Total Goals (and vice versa). The information added here will populate <a href="{% url 'statistics' %}">Statistics</a>.</p>
+		<p>To edit a past result, click the pencil icon beside the game in the Game Log section.</p>
 	<h2><a>{% block title %}Add Results{% endblock %}</a></h2> 
+</div>
 
 <div>
 
@@ -22,16 +28,15 @@
 			
 			{{ formset.management_form }}
 
-		<div class="row">
-		{% if formset.non_form_errors %}
-	        {% for error in formset.non_form_errors %}
-	            {{ error|escape }}
-	        {% endfor %}
-	    {% endif %}
-		</div>
-
-
 			{% for goal_form in formset %}
+			
+				<div class="row">
+				{% if formset.non_form_errors %}
+				    {% for error in formset.non_form_errors %}
+				        {{ error|escape }}
+				    {% endfor %}
+				{% endif %}
+				</div>
 			
 		        {% if forloop.first %}
 		        <thead>
@@ -80,7 +85,7 @@
 	<hr>
 <div>
 	{% if game %}
-		<h2><a>Last {{ num_games_display }} Games (most recent descending)</a></h2>
+		<h2><a>Game Log (Last {{ num_games_display }} Games)</a></h2>
 		<div class="table-responsive">
 			<table class='table table-hover'>
 				<thead>

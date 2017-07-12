@@ -1,10 +1,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
+from django.utils.safestring import mark_safe
 from .models import Post, Game, Player, Goal, Season
 
 from crispy_forms.helper import FormHelper
-
 
 
 class PostForm(forms.ModelForm):
@@ -15,10 +15,9 @@ class PostForm(forms.ModelForm):
 
 
 class GameForm(forms.ModelForm):
-	
+
 	class Meta:
 		model = Game
-		
 		fields = ["your_first_name","opponent_first_name","your_score","opponent_score"]
 		labels = {
 			'your_first_name': 'Your Name',
@@ -26,20 +25,32 @@ class GameForm(forms.ModelForm):
 			'your_score': 'Your Score',
 			'opponent_score': 'Opponent Score',
 		}
+		widgets = {
+			#This widget allows the foreign key field to display as a radio question.
+			"your_first_name": forms.RadioSelect(),
+			"opponent_first_name": forms.RadioSelect(),
+		}
+
+	def __init__(self, *args, **kwargs): #This function removes the empty label option in radio select.
+		super(GameForm, self).__init__(*args, **kwargs)
+		self.fields['your_first_name'].empty_label = None
+		self.fields['opponent_first_name'].empty_label = None
 
 
-	def clean(self, *args, **kwargs):
-		try:
-			cleaned_data = super(GameForm, self).clean()
-			your_first_name = self.cleaned_data['your_first_name']
-			opponent_first_name = self.cleaned_data['opponent_first_name']
+	def clean(self, *args, **kwargs): 
+		#For radioselect, must check if fields exist before requirement validation kicks in. Will cause error if this is not here.
+		if self.cleaned_data.get('your_first_name') and self.cleaned_data.get('opponent_first_name'): 
+			try:
+				cleaned_data = super(GameForm, self).clean()
+				your_first_name = self.cleaned_data['your_first_name']
+				opponent_first_name = self.cleaned_data['opponent_first_name']
+				if your_first_name == opponent_first_name:
+					raise forms.ValidationError('You cannot play against yourself!')
+				return cleaned_data
+			except AttributeError: #The try-except pattern guards against an AttributeError sometimes arising when cleaning data
+				pass
 
-			if your_first_name == opponent_first_name:
-				raise forms.ValidationError('You cannot play against yourself!')
-			return cleaned_data
-		except AttributeError: #The try-except pattern guards against an AttributeError sometimes arising when cleaning data
-			pass
-
+	
 
 class GoalForm(forms.ModelForm):
 

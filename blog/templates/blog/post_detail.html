@@ -19,7 +19,7 @@
 
         
         <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
-        <p>Author: <a href="/">{{post.author.first_name}}</a></p>
+        <p>Posted by <a href="/">{{post.author.first_name}}</a></p>
         <div class="date">
             <p>published: {{ post.publish_date |timesince }} ago</p>
         </div>

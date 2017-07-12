@@ -10,7 +10,7 @@ h1 a {
 
 body {
     width: 100%;
-    margin-bottom:120px;
+    margin-bottom:175px;
 }
 
 
@@ -28,7 +28,7 @@ body {
 }
 
 .page-header p {
-    color: #F5F5F5;
+    color: #eee;
     margin-left: 0px;
     text-decoration: none;
     font-style: oblique;
@@ -38,6 +38,7 @@ body {
 
 .content {
     padding-top:20px;
+    padding-bottom:20px;
 }
 
 .date {
@@ -72,16 +73,16 @@ html {
   bottom: 0;
   width: 100%;
   /* Set the fixed height of the footer here */
-  height: 80px;
-  background-color: #F5F5F5;
+  height: 150px;
+  background-color: #eee;
   text-align: center;
+  vertical-align: center;
   border-top: .05rem solid #e5e5e5;
 }
 
 .container {
   width: auto;
   max-width: 680px;
-  padding: 0 0px;
 }
 
 .container .text-muted {
@@ -89,31 +90,13 @@ html {
 
 }
 
-.vertical-menu {
-    width: 110%;  Set a width if you like 
+/*This adds vertical space between image of a blog post and the "posted by"*/
+.caption { 
+  padding-top: 15px;
 }
 
-.vertical-menu a {
-    background-color: #F5F5F5; /* Grey background color */
-    color: black; /* Black text color */
-    display: block; /* Make the links appear below each other */
-    padding: 15px; /* Add some padding */
-    text-decoration: none; /* Remove underline from links */
-}
-
-.vertical-menu a:hover {
-    background-color: #ccc; /* Dark grey background on mouse-over */
-}
-
-
-/*.nav ul {
-    height: 100%;
-    list-style-type: none;
-    overflow: auto;   
-    position: fixed;
-}
-
-li a {
-    display: block;
-    padding:8px;
+/*This displays the radio button options horizontally.*/
+/*.radio {
+  display:inline-block;
 }*/
+
