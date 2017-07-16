@@ -8,6 +8,8 @@
             <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         {% endif %}
 
+        <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
+
         <div>
 
         {%if post.image %}
@@ -17,8 +19,8 @@
         <div>
 
 
+        <br>
         
-        <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
         <p>Posted by <a href="/">{{post.author.first_name}}</a></p>
         <div class="date">
             <p>published: {{ post.publish_date |timesince }} ago</p>

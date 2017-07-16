@@ -179,18 +179,26 @@ def edit_results(request, pk):
         return redirect('login')
 
 
-#This function returns the Statistics page view.
-def statistics(request):
-    data = Game.get_player_data()
-    return render(request, 'blog/statistics.html', {'data':data})
+# #This function returns the Statistics page view.
+# def statistics(request):
+#     data = Game.get_player_data()
+#     return render(request, 'blog/statistics.html', {'data':data})
 
-#Class view displays data view. Function get returns data for charts in blog/statistics.html.
+#This class view renders the statistics page.
+class StatisticsView(View):
+    
+    def get(self, request, *args, **kwargs):
+        display_data = Game.get_game_data() 
+        # display_data = Game.objects.all()
+        return render(request, 'blog/statistics.html', {'data':display_data})
+
+#Class view displays data view. Function returns data for charts in blog/statistics.html.
 class ChartData(APIView):
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None):
-        resultset = Game.get_player_data()
+        resultset = Game.get_game_data()
         data = resultset
         return Response(data)
 

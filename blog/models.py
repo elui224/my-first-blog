@@ -12,33 +12,42 @@ from django.utils.text import slugify
 from markdown_deux import markdown
 from PIL import Image
 
+class PostQuerySet(models.query.QuerySet): #custom queryset to handle queries to return posts.
+	def not_draft(self):
+		return self.filter(draft=False)
+
+	def published(self):
+		return self.filter(publish_date__lte=timezone.now()).not_draft()
 
 
 class PostManager(models.Manager):
+	def get_queryset(self, *args, **kwargs):
+		return PostQuerySet(self.model, using=self._db)
+
 	def active(self, *args, **kwargs):
-		return super(PostManager, self).filter(draft=False).filter(publish_date__lte=timezone.now()).order_by('-created_date')
+		# return super(PostManager, self).filter(draft=False).filter(publish_date__lte=timezone.now()).order_by('-created_date')
+		return self.get_queryset().published().order_by('-created_date')
 
 
 def img_upload_location(instance, filename):
 	return "%s/%s" %(instance.slug, filename)
 
 class Post(models.Model):
-	author = models.ForeignKey('auth.User')
-	title = models.CharField(max_length = 100)
-	draft = models.BooleanField(default = False)
-	slug = models.SlugField(unique = True)
-	image = models.ImageField(upload_to=img_upload_location,
-		null = True,
-		blank = True, 
-		height_field = "height_field", 
-		width_field = "width_field")
-	height_field = models.IntegerField(default=0, null=True, blank = True)
-	width_field = models.IntegerField(default=0, null=True, blank = True)
-	bodytext = models.TextField()
-	created_date = models.DateTimeField(default = timezone.now)
-	publish_date = models.DateTimeField(auto_now = False, auto_now_add = False)
-
-	objects = PostManager()
+	author 			= models.ForeignKey('auth.User')
+	title 			= models.CharField(max_length = 100)
+	draft 			= models.BooleanField(default = False)
+	slug 			= models.SlugField(unique = True)
+	image 			= models.ImageField(upload_to=img_upload_location,
+						null = True,
+						blank = True, 
+						height_field = "height_field", 
+						width_field = "width_field")
+	height_field 	= models.IntegerField(default=0, null=True, blank = True)
+	width_field 	= models.IntegerField(default=0, null=True, blank = True)
+	bodytext 		= models.TextField()
+	created_date 	= models.DateTimeField(default = timezone.now)
+	publish_date 	= models.DateTimeField(auto_now = False, auto_now_add = False)
+	objects 		= PostManager()
 
 	def __str__(self):
 		return self.title
@@ -56,41 +65,49 @@ class Post(models.Model):
 		return mark_safe(markdown_bodytext)
 
 
-def create_slug(instance, new_slug=None): #recursive function to check whether instance of pk exists to create file name for post.
-	slug = slugify(instance.title)
-	if new_slug is not None:
-		slug = new_slug
-	qs = Post.objects.filter(slug=slug).order_by("-pk")
-	exists = qs.exists()
-	if exists:
-		new_slug = "%s-%s" %(slug, qs.first().pk)
-		return create_slug(instance, new_slug=new_slug)
-	return slug
+# def create_slug(instance, new_slug=None): #recursive function to check whether instance of pk exists to create file name for post.
+# 	slug = slugify(instance.title)
+# 	if new_slug is not None:
+# 		slug = new_slug
+# 	qs = Post.objects.filter(slug=slug).order_by("-pk")
+# 	exists = qs.exists()
+# 	if exists:
+# 		new_slug = "%s-%s" %(slug, qs.first().pk)
+# 		return create_slug(instance, new_slug=new_slug)
+# 	return slug
+
+'''
+Create random slug number instead of pk.
+'''
+from blog.utils import unique_slug_generator
 
 def pre_save_post_receiver(sender, instance, *args, **kwargs): #creates a new slug for a post before saving.
 	if not instance.slug:
-		instance.slug = create_slug(instance)
+		# instance.slug = create_slug(instance)
+		instance.slug = unique_slug_generator(instance)
 
 pre_save.connect(pre_save_post_receiver, sender=Post)
 
 
 class Team(models.Model):
-	manager_name = models.CharField(max_length = 50, default = None)
-	ACTIVE = 'A'
-	INACTIVE = 'I'
-	STATUS_CHOICES = (
-		(ACTIVE, 'Active'),
-		(INACTIVE, 'Inactive')
-		)
-	rec_status = models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
-	team_image = models.ImageField(upload_to=img_upload_location,
-		null = True,
-		blank = True, 
-		height_field = "height_field", 
-		width_field = "width_field")
-	height_field = models.IntegerField(default=0, null=True, blank = True)
-	width_field = models.IntegerField(default=0, null=True, blank = True)
-	profile_text = models.TextField(null = True, blank = True)
+	manager_name 	= models.CharField(max_length = 50, default = None)
+	ACTIVE 			= 'A'
+	INACTIVE 		= 'I'
+	STATUS_CHOICES 	= (
+					(ACTIVE, 'Active'),
+					(INACTIVE, 'Inactive')
+					)
+	rec_status 		= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+	team_image 		= models.ImageField(
+						upload_to 		= img_upload_location,
+						null 			= True,
+						blank 			= True, 
+						height_field 	= "height_field", 
+						width_field 	= "width_field"
+						)
+	height_field 	= models.IntegerField(default=0, null=True, blank = True)
+	width_field 	= models.IntegerField(default=0, null=True, blank = True)
+	profile_text 	= models.TextField(null = True, blank = True)
 
 	def __str__(self):
 		return self.manager_name
@@ -106,16 +123,16 @@ class Team(models.Model):
 
 
 class Player(models.Model):
-	team = models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
-	player_name = models.CharField(max_length = 100)
-	player_position = models.CharField(max_length = 4, null = True, blank = True)
-	ACTIVE = 'A'
-	INACTIVE = 'I'
-	STATUS_CHOICES = (
-		(ACTIVE, 'Active'),
-		(INACTIVE, 'Inactive')
-		)
-	player_team_rec_status = models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+	team 					= models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
+	player_name 			= models.CharField(max_length = 100)
+	player_position 		= models.CharField(max_length = 4, null = True, blank = True)
+	ACTIVE 					= 'A'
+	INACTIVE 				= 'I'
+	STATUS_CHOICES 			= (
+								(ACTIVE, 'Active'),
+								(INACTIVE, 'Inactive')
+							)
+	player_team_rec_status 	= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
 
 
 	def __str__(self):
@@ -128,6 +145,7 @@ class Player(models.Model):
 
 class Year(models.Model):
 	fifa_year = models.PositiveIntegerField(default=1)
+
 	def __str__(self):
 		return '{} {}'.format('Fifa Year', self.fifa_year)
 
@@ -152,8 +170,8 @@ def get_current_year_number():
 
 
 class Season(models.Model):
-	fifa_year = models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
-	season_number = models.PositiveIntegerField()
+	fifa_year 		= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
+	season_number 	= models.PositiveIntegerField()
 
 	def __str__(self):
 		return '{} {}'.format('Season', self.season_number)
@@ -198,15 +216,15 @@ def get_default_season_number():
 
 
 class Game(models.Model):
-	season_number = models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
-	your_first_name = models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
-	opponent_first_name = models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
-	your_score = models.PositiveIntegerField()
-	opponent_score = models.PositiveIntegerField()
-	your_result = models.PositiveIntegerField(editable=False)
-	opponent_result = models.PositiveIntegerField(editable=False)
-	timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
-	updated = models.DateTimeField(auto_now_add=False, auto_now=True)	
+	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
+	your_first_name 		= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
+	opponent_first_name 	= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
+	your_score 				= models.PositiveIntegerField()
+	opponent_score 			= models.PositiveIntegerField()
+	your_result 			= models.PositiveIntegerField(editable=False)
+	opponent_result 		= models.PositiveIntegerField(editable=False)
+	timestamp 				= models.DateTimeField(auto_now_add=True, auto_now=False)
+	updated 				= models.DateTimeField(auto_now_add=False, auto_now=True)	
 
 	def __str__(self):
 		return '{} vs {}'.format(self.your_first_name.manager_name, self.opponent_first_name.manager_name) 
@@ -226,7 +244,7 @@ class Game(models.Model):
 			self.opponent_result = 1
 		super(Game, self).save(*args, **kwargs)
 
-	def get_player_data():
+	def get_game_data():
 		data = {
 		'number_games': [],
 		'total_points':[],
@@ -306,11 +324,13 @@ def get_default_game_number():
 
 class Goal(models.Model):
 	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
-	game = models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
-	num_goals = models.PositiveIntegerField(null = True)
+	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
+	num_goals 	= models.PositiveIntegerField(null = True)
 
 	def __str__(self):
 		return '{} {}'.format("Game",self.game) 
+
+	#add method to return goal data here?
 
 
 
