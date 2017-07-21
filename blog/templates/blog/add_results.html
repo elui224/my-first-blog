@@ -8,7 +8,6 @@
 
 	{% block content %}
 
-
 <div>
 	<h2><a>Read Me</a></h2> 
 		<p>To record the results of a game, complete the required fields (*) and click Add Result. Adding goal scorers-- Goal Scorer and Total Goals-- is not required. If you provide a Goal Scorer, you must provide the corresponding Total Goals. The information added here will populate <a href="{% url 'statistics' %}">Statistics.</a></p>
@@ -30,15 +29,7 @@
 			{{ formset.management_form }}
 
 			{% for goal_form in formset %}
-			
-				<div class="row">
-				{% if formset.non_form_errors %}
-				    {% for error in formset.non_form_errors %}
-				        {{ error|escape }}
-				    {% endfor %}
-				{% endif %}
-				</div>
-			
+
 		        {% if forloop.first %}
 		        <thead>
 			        <tr>
@@ -64,8 +55,8 @@
 			                	{% endif %}
 
 			                	<!-- {{ field|as_crispy_field}}  -->
-			                	{{ field }}
-
+			                	{{ field }}{% if field.errors %} <strong>{{ field.errors|escape }}<strong> {% endif %}
+			                
 			                </td>    
 
 			            {% endfor %}

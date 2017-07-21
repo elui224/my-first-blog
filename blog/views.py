@@ -2,9 +2,10 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.forms import inlineformset_factory
-from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.views.generic import DetailView, TemplateView
 from django.views.generic import View
 from .forms import PostForm, GameForm, GoalForm, BaseGoalFormSet
 from .models import Post, Game, Team, Goal, Player
@@ -14,6 +15,36 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 # Create your views here.
+
+# class PostView(TemplateView):
+#     template_name = 'blog/post_list.html'
+
+#     def get_context_data(self, request, *args, **kwargs):
+#         context = super(PostView, self).get_context_data(*args, **kwargs)
+#         today = timezone.now()
+#         if request.user.is_staff or request.user.is_superuser:
+#             context = Post.objects.all().filter(publish_date__lte=timezone.now()).order_by('-created_date')
+#         else:
+#             context = Post.objects.active()
+
+#         query = request.GET.get("search_query") #implements search function on main page.
+
+#         if query:
+#             posts = posts.filter(
+#                 Q(title__icontains=query)|
+#                 Q(bodytext__icontains=query)
+#                 ).distinct()
+
+#         paginator = Paginator(posts, 5)
+#         page = request.GET.get('page')
+
+#         try:
+#             posts = paginator.page(page)
+#         except PageNotAnInteger:
+#             posts = paginator.page(1)
+#         except EmptyPage:
+#             posts = paginator.page(paginator.num_pages)
+#         return context
 
 #This function returns all the posts in descending order.
 def post_list(request):
@@ -103,9 +134,20 @@ def post_delete(request, slug):
     return redirect('post_detail')
 
 #This function returns the About page view.
-def about(request):
-    post = get_object_or_404(Post, pk=1)
-    return render(request, 'blog/post_detail.html', {'post': post})
+# def about(request):
+#     post = get_object_or_404(Post, pk=1)
+#     return render(request, 'blog/post_detail.html', {'post': post})
+
+class AboutView(TemplateView):
+    template_name = 'blog/post_detail.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(AboutView, self).get_context_data(*args, **kwargs)
+        post = get_object_or_404(Post, pk=1)
+        context = {
+            'post': post
+        }
+        return context
 
 #This function returns the Add Results page view.
 def add_results(request):
@@ -127,6 +169,7 @@ def add_results(request):
                     formset.save()
                     messages.success(request, 'Results Added!')
                     return redirect('add_results')
+
 
         else:
             form = GameForm()
@@ -185,12 +228,9 @@ def edit_results(request, pk):
 #     return render(request, 'blog/statistics.html', {'data':data})
 
 #This class view renders the statistics page.
-class StatisticsView(View):
-    
-    def get(self, request, *args, **kwargs):
-        display_data = Game.get_game_data() 
-        # display_data = Game.objects.all()
-        return render(request, 'blog/statistics.html', {'data':display_data})
+class StatisticsView(TemplateView):
+    template_name = "blog/statistics.html"
+
 
 #Class view displays data view. Function returns data for charts in blog/statistics.html.
 class ChartData(APIView):
