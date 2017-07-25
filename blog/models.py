@@ -229,10 +229,10 @@ class Game(models.Model):
 	def __str__(self):
 		return '{} vs {}'.format(self.your_first_name.manager_name, self.opponent_first_name.manager_name) 
 
-
+	#Converts your_result and opponent_result attribute based on form inputs by 
+	#overriding save method of form.
 	def save(self, *args, **kwargs):
-		# if self.pk is None and not self.season_number:
-		# 	self.season_number = 1
+
 		if self.your_score > self.opponent_score:
 			self.your_result = 3
 			self.opponent_result = 0
@@ -244,7 +244,9 @@ class Game(models.Model):
 			self.opponent_result = 1
 		super(Game, self).save(*args, **kwargs)
 
+	#add method to return game data to populate data display.
 	def get_game_data():
+
 		data = {
 		'number_games': [],
 		'total_points':[],
@@ -264,9 +266,9 @@ class Game(models.Model):
 			, sum(goals) AS goals
 			, sum(goal_diff) AS goal_diff
 			, count(total_points) AS number_games 
-			, count(case when total_points = 3 then 'W' end) AS number_wins
-			, count(case when total_points = 1 then 'W' end) AS number_ties
-			, count(case when total_points = 0 then 'W' end) AS number_losses
+			, sum(case when total_points = 3 then 1 end) AS number_wins
+			, sum(case when total_points = 1 then 1 end) AS number_ties
+			, sum(case when total_points = 0 then 1 end) AS number_losses
 		FROM (
 			SELECT 
 				blog_team.id
@@ -330,7 +332,33 @@ class Goal(models.Model):
 	def __str__(self):
 		return '{} {}'.format("Game",self.game) 
 
-	#add method to return goal data here?
+	#add method to return goal data to populate data display.
+	def get_goal_data():
+
+		query = '''
+			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
+				SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
+					when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
+					when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
+				FROM blog_player
+				INNER JOIN
+				blog_team ON blog_player.team_id = blog_team.id
+				inner join 
+				blog_goal ON blog_player.id = blog_goal.player_name_id
+				inner join
+				blog_game ON blog_game.id = blog_goal.game_id
+				where player_team_rec_status = 'A'
+				) data1
+			INNER JOIN 
+			blog_team ON data1.opponent = blog_team.id
+			where opponent is not null
+			GROUP BY id, mgr, player, blog_team.manager_name
+			ORDER BY player, mgr, tot_goals
+		'''
+
+		goals = Goal.objects.raw(query)
+
+		return list(goals)
 
 
 

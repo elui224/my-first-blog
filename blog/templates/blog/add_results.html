@@ -9,11 +9,8 @@
 	{% block content %}
 
 <div>
-	<h2><a>Read Me</a></h2> 
-		<p>To record the results of a game, complete the required fields (*) and click Add Result. Adding goal scorers-- Goal Scorer and Total Goals-- is not required. If you provide a Goal Scorer, you must provide the corresponding Total Goals. The information added here will populate <a href="{% url 'statistics' %}">Statistics.</a></p>
-		<p>To edit a past result, click the pencil icon <i class="fa fa-pencil" aria-hidden="true"></i> beside the game in the <a href="#anchor2">Game Log </a>section.</p>
-
 	<h2><a>{% block title %}Add Results{% endblock %}</a></h2> 
+		<p>Complete the required fields (*) and click Add Result. Adding goal scorers-- Goal Scorer and Total Goals-- is not required. If you provide a Goal Scorer, you must provide the corresponding Total Goals. The information added here will populate <a href="{% url 'statistics' %}">Statistics.</a></p>
 </div>
 
 <div class = "well">
@@ -41,7 +38,6 @@
 		        {% endif %}
 			    
 			    <tbody>
-
 				    <tr class='rowset_row'>
 
 			            {% for field in goal_form.visible_fields %}
@@ -78,6 +74,7 @@
 <div>
 	{% if game %}
 		<h2><a id="anchor2">Game Log (Last {{ num_games_display }} Games)</a></h2>
+		<p>To edit a past result, click the pencil icon <i class="fa fa-pencil" aria-hidden="true"></i> beside the game.</p>
 		<div class="table-responsive">
 			<table class='table table-hover'>
 				<thead>

@@ -1,11 +1,13 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.forms import inlineformset_factory
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, TemplateView, CreateView, ListView
 from django.views.generic import View
 from .forms import PostForm, GameForm, GoalForm, BaseGoalFormSet
 from .models import Post, Game, Team, Goal, Player
@@ -14,78 +16,39 @@ from .models import Post, Game, Team, Goal, Player
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-# Create your views here.
 
-# class PostView(TemplateView):
-#     template_name = 'blog/post_list.html'
+#This view returns all the posts in descending order.
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts' 
+    paginate_by = 5
 
-#     def get_context_data(self, request, *args, **kwargs):
-#         context = super(PostView, self).get_context_data(*args, **kwargs)
-#         today = timezone.now()
-#         if request.user.is_staff or request.user.is_superuser:
-#             context = Post.objects.all().filter(publish_date__lte=timezone.now()).order_by('-created_date')
-#         else:
-#             context = Post.objects.active()
+    def get_queryset(self):
+        today = timezone.now()
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = Post.objects.all().filter(publish_date__lte=timezone.now()).order_by('-created_date')
+        else:
+            queryset = Post.objects.active()
 
-#         query = request.GET.get("search_query") #implements search function on main page.
+        query = self.request.GET.get("search_query") #implements search function on main page.
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query)|
+                Q(bodytext__icontains=query)
+                ).distinct()
+        return queryset
 
-#         if query:
-#             posts = posts.filter(
-#                 Q(title__icontains=query)|
-#                 Q(bodytext__icontains=query)
-#                 ).distinct()
 
-#         paginator = Paginator(posts, 5)
-#         page = request.GET.get('page')
 
-#         try:
-#             posts = paginator.page(page)
-#         except PageNotAnInteger:
-#             posts = paginator.page(1)
-#         except EmptyPage:
-#             posts = paginator.page(paginator.num_pages)
-#         return context
-
-#This function returns all the posts in descending order.
-def post_list(request):
-    today = timezone.now()
-    if request.user.is_staff or request.user.is_superuser:
-        posts = Post.objects.all().filter(publish_date__lte=timezone.now()).order_by('-created_date')
-    else:
-        posts = Post.objects.active()
-    query = request.GET.get("search_query") #implements search function on main page.
-
-    if query:
-        posts = posts.filter(
-            Q(title__icontains=query)|
-            Q(bodytext__icontains=query)
-            ).distinct()
-
-    paginator = Paginator(posts, 5)
-    page = request.GET.get('page')
-
-    try:
-        posts = paginator.page(page)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
-
-    return render(request, 'blog/post_list.html', {'posts': posts})
-
-#This function returns an individual post in its own view to display more details. Retrieve.
-def post_detail(request, slug):
-    post = get_object_or_404(Post, slug=slug)
-
-    if post.publish_date > timezone.now() or post.draft:
-        if not request.user.is_staff or not request.user.is_superuser:
-            raise Http404
-
-    return render(request, 'blog/post_detail.html', {'post': post})
+# #This view returns an individual posts' details. Retrieve.
+class PostDetailView(DetailView):
+    model = Post
 
 #This function opens a form to easily edit blog posts. Create.
+@login_required()
 def post_new(request):
-    if request.user.is_staff or request.user.is_superuser:
+    # if request.user.is_staff or request.user.is_superuser:
         if request.method == "POST":
             form = PostForm(request.POST, request.FILES or None)
 
@@ -101,12 +64,25 @@ def post_new(request):
 
         return render(request, 'blog/post_edit.html', {'form': form})
 
-    else:
-        return redirect('login')
+    # else:
+    #     return redirect('login')
+
+# #class based view that allows one to create new blog posts.
+# class PostCreateView(CreateView):
+#     form_class = PostForm
+#     template_name = 'blog/post_edit.html'
+
+#     def form_valid(self, form):
+#         instance = form.save(commit=False)
+#         instance.author = self.request.user
+#         return super(PostCreateView, self).form_valid(form)
+
+
 
 #This functions allows blog views to be editable. Update.
+@login_required()
 def post_edit(request, slug):
-    if request.user.is_staff or request.user.is_superuser:
+    #if request.user.is_staff or request.user.is_superuser:
         post = get_object_or_404(Post, slug=slug)
 
         if request.method == "POST":
@@ -124,8 +100,8 @@ def post_edit(request, slug):
 
         return render(request, 'blog/post_edit.html', {'form': form})
 
-    else:
-        return redirect('login')
+    #else:
+        #return redirect('login')
 
 #This functions allows blog posts to be deleted. Delete.
 def post_delete(request, slug):
@@ -133,11 +109,7 @@ def post_delete(request, slug):
     post.delete()
     return redirect('post_detail')
 
-#This function returns the About page view.
-# def about(request):
-#     post = get_object_or_404(Post, pk=1)
-#     return render(request, 'blog/post_detail.html', {'post': post})
-
+#This view returns the About page view.
 class AboutView(TemplateView):
     template_name = 'blog/post_detail.html'
 
@@ -224,12 +196,16 @@ def edit_results(request, pk):
 
 # #This function returns the Statistics page view.
 # def statistics(request):
-#     data = Game.get_player_data()
+#     data = Game.get_game_data()
 #     return render(request, 'blog/statistics.html', {'data':data})
 
 #This class view renders the statistics page.
 class StatisticsView(TemplateView):
     template_name = "blog/statistics.html"
+
+    def get_goals(self):
+        goal_data = Goal.get_goal_data()
+        return goal_data
 
 
 #Class view displays data view. Function returns data for charts in blog/statistics.html.

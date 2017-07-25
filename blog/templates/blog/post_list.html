@@ -36,7 +36,24 @@
         
     {% endfor %}
 
+{% if is_paginated %}
 <div class="pagination">
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</a>
+            {% endif %}
+            <span class="page-current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+            {% endif %}
+        </span>
+{% endif %}
+</div>
+
+
+<!-- <div class="pagination">
     <span class="step-links">
         {% if posts.has_previous %}
             <a class="" href="?page={{ posts.previous_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</a>
@@ -50,7 +67,7 @@
             <a class="" role="button" href="?page={{ posts.next_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">Next <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
         {% endif %}
     </span>
-</div>
+</div> -->
 
 {% include 'blog/js.html' %}
 <script type="text/javascript">
