@@ -88,12 +88,12 @@ class Team(models.Model):
 					)
 	rec_status 		= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
 	team_image 		= models.ImageField(
-						upload_to 		= img_upload_location,
-						null 			= True,
-						blank 			= True, 
-						height_field 	= "height_field", 
-						width_field 	= "width_field"
-						)
+					upload_to 		= img_upload_location,
+					null 			= True,
+					blank 			= True, 
+					height_field 	= "height_field", 
+					width_field 	= "width_field"
+					)
 	height_field 	= models.IntegerField(default=0, null=True, blank = True)
 	width_field 	= models.IntegerField(default=0, null=True, blank = True)
 	profile_text 	= models.TextField(null = True, blank = True)
