@@ -51,7 +51,7 @@
 			                	{% endif %}
 
 			                	<!-- {{ field|as_crispy_field}}  -->
-			                	{{ field }}{% if field.errors %} <strong>{{ field.errors|escape }}<strong> {% endif %}
+			                	{{ field }}{% if field.errors %} <span class = 'text-danger small'><strong>{{ field.errors|escape }}<strong> </span>{% endif %}
 			                
 			                </td>    
 

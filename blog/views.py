@@ -1,14 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import inlineformset_factory
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.views.generic import DetailView, TemplateView, CreateView, ListView
-from django.views.generic import View
+from django.urls import reverse_lazy
+from django.core.urlresolvers import reverse
+from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView
 from .forms import PostForm, GameForm, GoalForm, BaseGoalFormSet
 from .models import Post, Game, Team, Goal, Player
 
@@ -45,81 +46,53 @@ class PostListView(ListView):
 class PostDetailView(DetailView):
     model = Post
 
-#This function opens a form to easily edit blog posts. Create.
-@login_required()
-def post_new(request):
-    # if request.user.is_staff or request.user.is_superuser:
-        if request.method == "POST":
-            form = PostForm(request.POST, request.FILES or None)
 
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.author = request.user
-                # post.publish_date = timezone.now()
-                post.save()
-                return redirect('post_detail', slug=post.slug)
+#class based view that allows one to create new blog posts.
+class PostCreateView(LoginRequiredMixin, CreateView):
+    form_class = PostForm
+    template_name = 'blog/post_edit.html'
+    login_url = 'login'
+    redirect_field_name = 'redirect_to'
 
-        else:
-            form = PostForm()
+    def form_valid(self, form):
+        instance = form.save(commit=False)
+        instance.author = self.request.user     
+        return super(PostCreateView, self).form_valid(form) 
 
-        return render(request, 'blog/post_edit.html', {'form': form})
-
-    # else:
-    #     return redirect('login')
-
-# #class based view that allows one to create new blog posts.
-# class PostCreateView(CreateView):
-#     form_class = PostForm
-#     template_name = 'blog/post_edit.html'
-
-#     def form_valid(self, form):
-#         instance = form.save(commit=False)
-#         instance.author = self.request.user
-#         return super(PostCreateView, self).form_valid(form)
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={"slug": self.object.slug})  
 
 
+#This class renders the post edit views. NEEDS WORK.
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_edit.html' 
+    login_url = 'login'
+    redirect_field_name = 'redirect_to'
 
-#This functions allows blog views to be editable. Update.
-@login_required()
-def post_edit(request, slug):
-    #if request.user.is_staff or request.user.is_superuser:
-        post = get_object_or_404(Post, slug=slug)
+    def form_valid(self, form):
+        instance = form.save(commit=False)
+        instance.author = self.request.user 
+        return super(PostUpdateView, self).form_valid(form)  
 
-        if request.method == "POST":
-            form = PostForm(request.POST, request.FILES or None, instance=post)
+    def get_success_url(self):
+        return reverse('post_detail', kwargs={"slug": self.object.slug})  
 
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.author = request.user
-                # post.publish_date = timezone.now()
-                post.save()
-                return redirect('post_detail', slug=post.slug)
 
-        else:
-            form = PostForm(instance=post)
+#This class deletes posts.
+class PostDeleteView(DeleteView):
+    model = Post
+    success_url = reverse_lazy('post_list')
 
-        return render(request, 'blog/post_edit.html', {'form': form})
-
-    #else:
-        #return redirect('login')
-
-#This functions allows blog posts to be deleted. Delete.
-def post_delete(request, slug):
-    post = get_object_or_404(Post, slug=slug)
-    post.delete()
-    return redirect('post_detail')
 
 #This view returns the About page view.
-class AboutView(TemplateView):
+class AboutView(DetailView):
     template_name = 'blog/post_detail.html'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(AboutView, self).get_context_data(*args, **kwargs)
-        post = get_object_or_404(Post, pk=1)
-        context = {
-            'post': post
-        }
-        return context
+    def get_object(self):
+        return get_object_or_404(Post,pk=1)
+
 
 #This function returns the Add Results page view.
 def add_results(request):

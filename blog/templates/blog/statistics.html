@@ -99,8 +99,6 @@ function renderChart() {
 		<p> <i>Click a legend option to remove from the chart.</i></p>
 	</div>
 
-{% if user.is_staff or user.is_superuser %}
-
 <div>
 	{% if view.get_goals %}
 		<h2><a id="">Goal Scorers</a></h2>
@@ -128,11 +126,9 @@ function renderChart() {
 				{% endfor %}
 			</table>
 		</div>
-	{% endif %}
 </div>
 
-<!-- Need to add pagination and a search query.
-<div class="pagination">
+<!-- <div class="pagination">
     <span class="step-links">
         {% if posts.has_previous %}
             <a class="" href="?page={{ posts.previous_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</a>
@@ -148,9 +144,7 @@ function renderChart() {
     </span>
 </div> -->
 
-<!--   {% for goals in view.get_goals %}
-    <li>{{ goals.mgr }} | {{ goals.player }} | {{ goals.opponent_scored_on }} | {{ goals.tot_goals }}</li>
-  {% endfor %} -->
+
 
 {% endif %}
 

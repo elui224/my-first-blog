@@ -4,18 +4,27 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 from . import views
-from .views import  AboutView, ChartData, PostDetailView, PostListView, StatisticsView
+from .views import  (
+		AboutView, 
+		ChartData, 
+		PostDetailView, 
+		PostListView, 
+		StatisticsView, 
+		PostCreateView, 
+		PostDeleteView, 
+		PostUpdateView
+		)
 
 
 urlpatterns = [
     # url(r'^$', views.post_list, name='post_list'),
     url(r'^$', PostListView.as_view(), name='post_list'),
-    url(r'^post/new/$', views.post_new, name='post_new'),
-    # url(r'^post/new/$', PostCreateView.as_view(), name='post_new'),
-    # url(r'^post/(?P<slug>[\w-]+)/$', views.post_detail, name='post_detail'),
+    url(r'^post/new/$', PostCreateView.as_view(), name='post_new'),
     url(r'^post/(?P<slug>[\w-]+)/$', PostDetailView.as_view(), name='post_detail'),
-    url(r'^post/(?P<slug>[\w-]+)/edit/$', views.post_edit, name='post_edit'),
-    url(r'^post/(?P<slug>[\w-]+)/delete/$', views.post_delete, name='post_delete'),
+    # url(r'^post/(?P<slug>[\w-]+)/edit/$', views.post_edit, name='post_edit'),
+    url(r'^post/(?P<slug>[\w-]+)/edit/$', PostUpdateView.as_view(), name='post_edit'),
+    # url(r'^post/(?P<slug>[\w-]+)/delete/$', views.post_delete, name='post_delete'),
+    url(r'^post/(?P<slug>[\w-]+)/delete/$', PostDeleteView.as_view(), name='post_delete'),
 	url(r'^login/$', auth_views.login, {'template_name': 'registration/login.html'}, name='login'),
 	# url(r'^accounts/login/$', auth_views.LoginView.as_view()),
 	url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),

@@ -46,7 +46,7 @@ class Post(models.Model):
 	width_field 	= models.IntegerField(default=0, null=True, blank = True)
 	bodytext 		= models.TextField()
 	created_date 	= models.DateTimeField(default = timezone.now)
-	publish_date 	= models.DateTimeField(auto_now = False, auto_now_add = False)
+	publish_date 	= models.DateTimeField(default = timezone.now, auto_now = False, auto_now_add = False)
 	objects 		= PostManager()
 
 	def __str__(self):
@@ -64,17 +64,6 @@ class Post(models.Model):
 		markdown_bodytext = markdown(bodytext)
 		return mark_safe(markdown_bodytext)
 
-
-# def create_slug(instance, new_slug=None): #recursive function to check whether instance of pk exists to create file name for post.
-# 	slug = slugify(instance.title)
-# 	if new_slug is not None:
-# 		slug = new_slug
-# 	qs = Post.objects.filter(slug=slug).order_by("-pk")
-# 	exists = qs.exists()
-# 	if exists:
-# 		new_slug = "%s-%s" %(slug, qs.first().pk)
-# 		return create_slug(instance, new_slug=new_slug)
-# 	return slug
 
 '''
 Create random slug number instead of pk.
