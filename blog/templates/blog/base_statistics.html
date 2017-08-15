@@ -1,0 +1,18 @@
+{% extends 'blog/base.html' %}
+
+{% block head_title %} {{block.super}} | Statistics {% endblock head_title %}
+
+{% block content %}
+<div>
+	<ul class="nav nav-tabs nav-justified">
+	  <li><a href="{% url 'statistics' %}">Overall</a></li>
+	  <li><a href="{% url 'statistics_season'%}">Season</a></li>
+	  <li><a href="{% url 'statistics_h2h'%}">Head to Head</a></li>
+	  <li><a href="{% url 'statistics_player'%}">Player</a></li>
+	</ul>
+</div>
+
+{% block statscontent %}{% endblock %}	
+
+{% endblock %}
+

@@ -1,0 +1,51 @@
+
+{% extends 'blog/base_statistics.html' %}
+
+{% block statscontent %}
+
+<div class="tab-content">
+
+	<h2><a id="">Player</a></h2>
+
+	<table id="data-table" class="table table-bordered table-striped table-hover">
+		<thead>
+			<tr>
+				<!-- <td>Manager</td> -->
+				<td>Player</td>
+				<td>Opponent</td>
+				<td>Goals</td>
+			</tr>
+		</thead>
+
+
+	</table>
+
+</div>
+
+{% endblock %}
+
+
+<script type="text/javascript">
+
+{% block jquery %}
+var endpoint = '/api/chart/playerdata/';
+$('#data-table').DataTable({
+	paging: true,
+	order: [[ 0, "desc" ]],
+    ajax: {
+        url: endpoint,
+        dataSrc: '' 
+    },
+    columns: [
+			// { "data": "manager"},
+			{ "data": "player"},
+			{ "data": "mgr"},
+			{ "data": "goals"}
+    ]
+});
+	 
+
+{% endblock jquery %}
+
+</script>
+
