@@ -167,18 +167,24 @@ def edit_results(request, pk):
         return redirect('login')
 
 
-# #This function returns the Statistics page view.
-# def statistics(request):
-#     data = Game.get_game_data()
-#     return render(request, 'blog/statistics.html', {'data':data})
 
 #This class view renders the statistics page.
 class StatisticsView(TemplateView):
     template_name = "blog/statistics.html"
 
-    def get_goals(self):
-        goal_data = Goal.get_goal_data()
-        return goal_data
+#This class view renders the statistics page.
+class StatisticsSeasonView(TemplateView):
+    template_name = "blog/statistics_season.html"
+
+#This class view renders the statistics page.
+class StatisticsHeadView(TemplateView):
+    template_name = "blog/statistics_h2h.html"
+
+
+#This class view renders the statistics page.
+class StatisticsPlayerView(TemplateView):
+    template_name = "blog/statistics_player.html"
+
 
 
 #Class view displays data view. Function returns data for charts in blog/statistics.html.
@@ -190,5 +196,26 @@ class ChartData(APIView):
         resultset = Game.get_game_data()
         data = resultset
         return Response(data)
+
+#Class view displays data view. Function returns data for charts in blog/statistics/season.html.
+class ChartSeasonData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+        seasonset = Game.get_season_game_data()
+        data = seasonset
+        return Response(data)
+
+#Class view displays data view. Function returns data for charts in blog/statistics/player.html.
+class ChartPlayerData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+        playerset = Goal.get_goal_against_data()
+        data = playerset
+        return Response(data)
+
 
 

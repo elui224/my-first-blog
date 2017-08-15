@@ -7,12 +7,18 @@ from . import views
 from .views import  (
 		AboutView, 
 		ChartData, 
+		ChartSeasonData,
+		ChartPlayerData,
 		PostDetailView, 
 		PostListView, 
 		StatisticsView, 
+		StatisticsHeadView,
+		StatisticsSeasonView,
+		StatisticsPlayerView,
 		PostCreateView, 
 		PostDeleteView, 
-		PostUpdateView
+		PostUpdateView,
+		
 		)
 
 
@@ -30,8 +36,13 @@ urlpatterns = [
 	url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
 	url(r'^about/$', AboutView.as_view(), name='about'),
 	url(r'^statistics/$', StatisticsView.as_view(), name='statistics'),
+	url(r'^statistics/season/$', StatisticsSeasonView.as_view(), name='statistics_season'),
+	url(r'^statistics/h2h/$', StatisticsHeadView.as_view(), name='statistics_h2h'),
+	url(r'^statistics/player/$', StatisticsPlayerView.as_view(), name='statistics_player'),
 	# url(r'^statistics/$', views.statistics, name='statistics'),
 	url(r'^api/chart/data/$', ChartData.as_view()),
+	url(r'^api/chart/seasondata/$', ChartSeasonData.as_view()),
+	url(r'^api/chart/playerdata/$', ChartPlayerData.as_view()),
 	url(r'^add_results/$', views.add_results, name='add_results'),
 	url(r'^result/(?P<pk>[0-9]+)/$', views.edit_results, name='edit_results'),
 

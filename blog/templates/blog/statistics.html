@@ -1,13 +1,8 @@
-{% extends 'blog/base.html' %}
-
-
+{% extends 'blog/base_statistics.html' %}
 
 <script>
 {% block jquery %}
-
 var endpoint = '/api/chart/data/';
-// var labels = [];
-// var defaultData = [];
 
 
 $.ajax({
@@ -84,68 +79,24 @@ function renderChart() {
 };
 
 
+{% endblock jquery %}
 
-{% endblock %}
 </script>
 
-{% block head_title %} {{block.super}} | Statistics {% endblock head_title %}
 
-{% block content %}
 
-    <h2><a>Statistics</a></h2>
+{% block statscontent %}
+
+<div class="tab-content">
+    <h2><a>Overall</a></h2>
 
     <div class= col-md-12>
 		<canvas id="myChart" width="400" height="400"></canvas>
 		<p> <i>Click a legend option to remove from the chart.</i></p>
 	</div>
 
-<div>
-	{% if view.get_goals %}
-		<h2><a id="">Goal Scorers</a></h2>
-		<div class="table-responsive">
-			<table class='table table-hover'>
-				<thead>
-					<tr>
-						<th>Manager</th>
-						<th>Player</th>
-						<th>Opponent</th>	
-						<th>Total Goals</th>		
-					</tr>
-				</thead>
-
-				{% for instance in view.get_goals %}	
-	
-				<tbody>
-					<tr>
-						<td>{{instance.mgr}}</td>
-						<td>{{instance.player}}</td>
-						<td>{{instance.opponent_scored_on}}</td>
-						<td> {{instance.tot_goals}}</td>
-					</tr>
-				</tbody>
-				{% endfor %}
-			</table>
-		</div>
+	<br>
+	<hr>
 </div>
-
-<!-- <div class="pagination">
-    <span class="step-links">
-        {% if posts.has_previous %}
-            <a class="" href="?page={{ posts.previous_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</a>
-        {% endif %}
-
-        <span class="current">
-            page {{ posts.number }} of {{ posts.paginator.num_pages }}
-        </span>
-
-        {% if posts.has_next %}
-            <a class="" role="button" href="?page={{ posts.next_page_number }}{% if request.GET.search_query%}&search_query={{ request.GET.search_query }}{% endif %}">Next <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-        {% endif %}
-    </span>
-</div> -->
-
-
-
-{% endif %}
 
 {% endblock %}

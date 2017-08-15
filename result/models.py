@@ -6,14 +6,24 @@ import datetime
 #Models the data input form and statistics base for fifa statistics.	
 
 class Team(models.Model):
-	manager_name = models.CharField(max_length = 50)
-	ACTIVE = 'A'
-	INACTIVE = 'I'
-	STATUS_CHOICES = (
-		(ACTIVE, 'Active'),
-		(INACTIVE, 'Inactive')
-		)
-	rec_status = models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+	manager_name 	= models.CharField(max_length = 50, default = None)
+	ACTIVE 			= 'A'
+	INACTIVE 		= 'I'
+	STATUS_CHOICES 	= (
+					(ACTIVE, 'Active'),
+					(INACTIVE, 'Inactive')
+					)
+	rec_status 		= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+	team_image 		= models.ImageField(
+					upload_to 		= img_upload_location,
+					null 			= True,
+					blank 			= True, 
+					height_field 	= "height_field", 
+					width_field 	= "width_field"
+					)
+	height_field 	= models.IntegerField(default=0, null=True, blank = True)
+	width_field 	= models.IntegerField(default=0, null=True, blank = True)
+	profile_text 	= models.TextField(null = True, blank = True)
 
 	def __str__(self):
 		return self.manager_name
@@ -29,8 +39,17 @@ class Team(models.Model):
 
 
 class Player(models.Model):
-	team = models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
-	player_name = models.CharField(max_length = 100)
+	team 					= models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
+	player_name 			= models.CharField(max_length = 100)
+	player_position 		= models.CharField(max_length = 4, null = True, blank = True)
+	ACTIVE 					= 'A'
+	INACTIVE 				= 'I'
+	STATUS_CHOICES 			= (
+								(ACTIVE, 'Active'),
+								(INACTIVE, 'Inactive')
+							)
+	player_team_rec_status 	= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+
 
 	def __str__(self):
 		return str(self.player_name)
@@ -42,6 +61,7 @@ class Player(models.Model):
 
 class Year(models.Model):
 	fifa_year = models.PositiveIntegerField(default=1)
+
 	def __str__(self):
 		return '{} {}'.format('Fifa Year', self.fifa_year)
 
@@ -50,29 +70,32 @@ def get_current_year_number():
 	year_exists = year_qs.exists()
 	if year_exists:
 		current_year_object = Year.objects.latest('fifa_year')
-		now = timezone.now()
-		fifa_release_date = datetime.date(day=26, year=2017, month=9)  #release date of fifa18. Setting release date needs work.
-		if now == fifa_release_date:
-			current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
+		set_action_date = "2017-07-12 16:55:00" #yyyy/mm/dd h:m:s  #release date of fifa18.
+		date_format = "%Y-%m-%d %H:%M:%S"
+		now = datetime.now().strftime(date_format)
+		# fifa_release_date = datetime.strptime(set_action_date, date_format) 
+		current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
+		if datetime.now().strftime(date_format) == set_action_date:
 			next_fifa_year = current_fifa_year + 1
 			Year.objects.create(fifa_year=next_fifa_year)
-			current_year_object = Year.objects.latest('fifa_year')
+			default_year_object = current_year_object
 	else:
-		current_year_object = Year.objects.create(fifa_year=1)
-	return current_year_object
+		default_year_object = Year.objects.create(fifa_year=1)
+	return default_year_object
 
 
 
 class Season(models.Model):
-	fifa_year = models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
-	season_number = models.PositiveIntegerField()
+	fifa_year 		= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
+	season_number 	= models.PositiveIntegerField()
 
 	def __str__(self):
 		return '{} {}'.format('Season', self.season_number)
 
 
-#Returns the current season based on number of games played to display.
+
 def get_default_season_number(): 
+#Returns the current season based on number of games played to display.
 	active_teams_count = Team.get_active_teams_count()
 	season_games_against_opponent = 2
 	opponents_per_season = active_teams_count - 1
@@ -109,23 +132,23 @@ def get_default_season_number():
 
 
 class Game(models.Model):
-	season_number = models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
-	your_first_name = models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
-	opponent_first_name = models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
-	your_score = models.PositiveIntegerField()
-	opponent_score = models.PositiveIntegerField()
-	your_result = models.PositiveIntegerField(editable=False)
-	opponent_result = models.PositiveIntegerField(editable=False)
-	timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
-	updated = models.DateTimeField(auto_now_add=False, auto_now=True)	
+	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
+	your_first_name 		= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
+	opponent_first_name 	= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
+	your_score 				= models.PositiveIntegerField()
+	opponent_score 			= models.PositiveIntegerField()
+	your_result 			= models.PositiveIntegerField(editable=False)
+	opponent_result 		= models.PositiveIntegerField(editable=False)
+	timestamp 				= models.DateTimeField(auto_now_add=True, auto_now=False)
+	updated 				= models.DateTimeField(auto_now_add=False, auto_now=True)	
 
 	def __str__(self):
 		return '{} vs {}'.format(self.your_first_name.manager_name, self.opponent_first_name.manager_name) 
 
-
+	#Converts your_result and opponent_result attribute based on form inputs by 
+	#overriding save method of form.
 	def save(self, *args, **kwargs):
-		# if self.pk is None and not self.season_number:
-		# 	self.season_number = 1
+
 		if self.your_score > self.opponent_score:
 			self.your_result = 3
 			self.opponent_result = 0
@@ -137,7 +160,9 @@ class Game(models.Model):
 			self.opponent_result = 1
 		super(Game, self).save(*args, **kwargs)
 
-	def get_player_data():
+	#add method to return game data to populate data display.
+	def get_game_data():
+
 		data = {
 		'number_games': [],
 		'total_points':[],
@@ -157,9 +182,9 @@ class Game(models.Model):
 			, sum(goals) AS goals
 			, sum(goal_diff) AS goal_diff
 			, count(total_points) AS number_games 
-			, count(case when total_points = 3 then 'W' end) AS number_wins
-			, count(case when total_points = 1 then 'W' end) AS number_ties
-			, count(case when total_points = 0 then 'W' end) AS number_losses
+			, sum(case when total_points = 3 then 1 end) AS number_wins
+			, sum(case when total_points = 1 then 1 end) AS number_ties
+			, sum(case when total_points = 0 then 1 end) AS number_losses
 		FROM (
 			SELECT 
 				blog_team.id
@@ -214,14 +239,45 @@ def get_default_game_number():
 
 	return current_game_object
 
+class GoalManager(models.Manager):
+
+	def goals_against(self):
+		# from django.db import connection
+
+		query = '''
+			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
+				SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
+					when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
+					when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
+				FROM blog_player
+				INNER JOIN
+				blog_team ON blog_player.team_id = blog_team.id
+				INNER JOIN 
+				blog_goal ON blog_player.id = blog_goal.player_name_id
+				INNER JOIN
+				blog_game ON blog_game.id = blog_goal.game_id
+				where player_team_rec_status = 'A'
+				) data1
+			INNER JOIN 
+			blog_team ON data1.opponent = blog_team.id
+			WHERE opponent is not null
+			GROUP BY id, mgr, player, opponent_scored_on
+			ORDER BY player, mgr, tot_goals
+		'''
+
+		return self.raw(query)
+
 
 class Goal(models.Model):
 	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
-	game = models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
-	num_goals = models.PositiveIntegerField(null = True)
+	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
+	num_goals 	= models.PositiveIntegerField(null = True)
+	objects 	= GoalManager()
 
 	def __str__(self):
 		return '{} {}'.format("Game",self.game) 
+
+
 
 
 

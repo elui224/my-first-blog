@@ -9,6 +9,8 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from markdown_deux import markdown
 from PIL import Image
 
@@ -298,6 +300,65 @@ class Game(models.Model):
 
 		return data
 
+	def get_season_game_data():
+
+		query_season = '''
+		SELECT 
+			id
+			, manager_name
+			, season_number
+			, sum(case when total_points = 3 then 1 else 0 end) AS number_wins
+			, sum(case when total_points = 1 then 1 else 0 end) AS number_ties
+			, sum(case when total_points = 0 then 1 else 0 end) AS number_losses
+			, sum(total_points) AS total_points
+			, sum(goals) AS goals
+			, sum(goal_diff) AS goal_diff
+			, count(total_points) AS number_games 
+
+		FROM (
+				
+			SELECT 
+				blog_team.id
+				, blog_season.season_number
+				, blog_team.manager_name
+				, blog_team.rec_status
+				, blog_game.your_result AS total_points 
+				, blog_game.your_score AS goals
+				, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
+			FROM blog_team 
+			LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id) 
+			LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+			WHERE blog_team.rec_status = 'A'
+			
+			UNION ALL 
+			
+			SELECT 
+				blog_team.id
+				, blog_season.season_number
+				, blog_team.manager_name
+				, blog_team.rec_status
+				, blog_game.opponent_result AS total_points 
+				, blog_game.opponent_score AS goals
+				, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
+			FROM blog_team 
+			LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id) 
+			LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+			WHERE blog_team.rec_status = 'A'
+			) AGGREGATED 
+		GROUP BY id, manager_name, rec_status, season_number
+		ORDER BY SEASON_NUMBER
+		'''
+
+		seasonal_data = Team.objects.raw(query_season)
+
+		rows = []
+		for row in seasonal_data:
+			r = ({"season":"Season " + str(row.season_number), "manager": row.manager_name, "wins": row.number_wins, "ties": row.number_ties, "losses": row.number_losses
+				, "points": row.total_points, "goals": row.goals, "GD": row.goal_diff, "games": row.number_games})
+			rows.append(r)
+
+
+		return rows
 
 #Returns the current game
 def get_default_game_number(): 
@@ -321,10 +382,10 @@ class Goal(models.Model):
 	def __str__(self):
 		return '{} {}'.format("Game",self.game) 
 
-	#add method to return goal data to populate data display.
-	def get_goal_data():
 
-		query = '''
+	def get_goal_against_data():
+
+		query_player = '''
 			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
 				SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
 					when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
@@ -332,22 +393,29 @@ class Goal(models.Model):
 				FROM blog_player
 				INNER JOIN
 				blog_team ON blog_player.team_id = blog_team.id
-				inner join 
+				INNER JOIN 
 				blog_goal ON blog_player.id = blog_goal.player_name_id
-				inner join
+				INNER JOIN
 				blog_game ON blog_game.id = blog_goal.game_id
 				where player_team_rec_status = 'A'
 				) data1
 			INNER JOIN 
 			blog_team ON data1.opponent = blog_team.id
-			where opponent is not null
-			GROUP BY id, mgr, player, blog_team.manager_name
+			WHERE opponent is not null
+			GROUP BY id, mgr, player, opponent_scored_on
 			ORDER BY player, mgr, tot_goals
 		'''
 
-		goals = Goal.objects.raw(query)
+		goal_against_data = Player.objects.raw(query_player)
 
-		return list(goals)
+		goal_against_rows = []
+
+		for row in goal_against_data:
+			r = ({"id":row.id, "manager": row.mgr, "player": row.player, "mgr": row.opponent_scored_on, "goals": row.tot_goals})
+			goal_against_rows.append(r)
+
+
+		return goal_against_rows
 
 
 
