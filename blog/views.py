@@ -214,7 +214,10 @@ class ChartPlayerData(APIView):
 
     def get(self, request, format=None):
         playerset = Goal.get_goal_against_data()
-        data = playerset
+        filter_none = self.request.query_params.get('season', None)
+        if filter_none is not None:
+            data = playerset.filter(season=filter_none)
+            # data = playerset
         return Response(data)
 
 
