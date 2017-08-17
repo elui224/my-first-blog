@@ -345,6 +345,7 @@ class Game(models.Model):
 			LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
 			WHERE blog_team.rec_status = 'A'
 			) AGGREGATED 
+		WHERE season_number is not null
 		GROUP BY id, manager_name, rec_status, season_number
 		ORDER BY SEASON_NUMBER
 		'''
