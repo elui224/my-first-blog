@@ -7,7 +7,7 @@
 
 	<h2><a id="">Player</a></h2>
 
-	<table id="data-table" class="table table-bordered table-striped table-hover">
+	<table id="data-tables" class="table table-bordered table-striped table-hover">
 		<thead>
 			<tr>
 				<!-- <td>Manager</td> -->
@@ -29,7 +29,7 @@
 
 {% block jquery %}
 var endpoint = '/api/chart/playerdata/';
-$('#data-table').DataTable({
+$('#data-tables').DataTable({
 	paging: true,
 	order: [[ 0, "desc" ]],
     ajax: {

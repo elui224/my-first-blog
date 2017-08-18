@@ -5,15 +5,23 @@
 
 <div class="tab-content">
 
-	<h2><a id="">Head to Head</a></h2>
-	Coming soon.
+	<h2><a>Head to Head</a></h2>
 
 	<table id="data-table" class="table table-bordered table-striped table-hover">
+
 		<thead>
 			<tr>
-
+				<td>Player - Home</td>
+				<td>Player - Away</td>
+				<td>Wins</td>
+				<td>Ties</td>
+				<td>Losses</td>
+				<td>Points</td>
+				<td>GD</td>
+				<td>Games</td>
 			</tr>
 		</thead>
+
 
 
 	</table>
@@ -22,25 +30,30 @@
 
 {% endblock %}
 
+<script type="text/javascript">
 
+{% block jquery %}
 
-// <script type="text/javascript">
+var endpoint = '/api/chart/managerdata/';
+$('#data-table').DataTable({
 
-// {% block jquery %}
-// var endpoint = '/api/chart/headtoheaddata/';
-// $('#data-table').DataTable({
-// 	paging: true,
-//     ajax: {
-//         url: endpoint,
-//         dataSrc: '' 
-//     },
-//     columns: [
-
-//     ]
-// });
+    ajax: {
+        url: endpoint,
+        dataSrc: '' 
+    },
+    columns: [
+			{ "data": "player"},
+			{ "data": "opponent"},
+			{ "data": "wins"},
+			{ "data": "ties"},
+			{ "data": "losses"},
+			{ "data": "points"},
+			{ "data": "GD"},
+			{ "data": "games"}
+    ]
+});
 	 
+{% endblock jquery %}
 
-// {% endblock jquery %}
-
-// </script>
+</script>
 

@@ -361,6 +361,57 @@ class Game(models.Model):
 
 		return rows
 
+	def get_headtohead_data():
+
+		query_headtohead = '''
+		select 
+		 stats.player as id
+		, stats.opponent opponent
+		, sum(number_wins) wins
+		, sum(number_ties) ties
+		, sum(number_losses) losses
+		, sum(result) total_points
+		, sum(goal_diff) GD
+		, count(result) games
+			from (
+			select blog_game.id, t.manager_name as player, te.manager_name as opponent 
+			, your_result result
+			, case when blog_game.your_result = 3 then 1 else 0 end AS number_wins
+			, case when blog_game.your_result = 1 then 1 else 0 end AS number_ties
+			, case when blog_game.your_result = 0 then 1 else 0 end AS number_losses
+			, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
+
+			from blog_game
+			inner join blog_team t on blog_game.your_first_name_id = t.id
+			inner join blog_team te on blog_game.opponent_first_name_id = te.id
+
+			union all 
+
+			select blog_game.id, t.manager_name as player, te.manager_name as opponent 
+			, opponent_result result
+			, case when blog_game.opponent_result = 3 then 1 else 0 end AS number_wins
+			, case when blog_game.opponent_result = 1 then 1 else 0 end AS number_ties
+			, case when blog_game.opponent_result = 0 then 1 else 0 end AS number_losses
+			, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
+
+			from blog_game
+			inner join blog_team t on blog_game.opponent_first_name_id = t.id
+			inner join blog_team te on blog_game.your_first_name_id = te.id
+
+			) stats
+		group by stats.player, stats.opponent
+		'''
+
+		headtohead_data = Game.objects.raw(query_headtohead)
+
+		rows = []
+		for row in headtohead_data:
+			r = ({"player": row.id, "opponent": row.opponent, "wins": row.wins, "ties": row.ties, "losses": row.losses
+				, "points": row.total_points, "GD": row.GD, "games": row.games})
+			rows.append(r)
+
+		return rows
+
 #Returns the current game
 def get_default_game_number(): 
 	game_qs = Game.objects.all()

@@ -207,6 +207,16 @@ class ChartSeasonData(APIView):
         data = seasonset
         return Response(data)
 
+#Class view displays data view. Function returns data for charts in blog/statistics/headtoheaddata.html.
+class ChartHeadtoHeadData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+        h2hset = Game.get_headtohead_data()
+        data = h2hset
+        return Response(data)
+
 #Class view displays data view. Function returns data for charts in blog/statistics/player.html.
 class ChartPlayerData(APIView):
     authentication_classes = []
