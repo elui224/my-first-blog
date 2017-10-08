@@ -62,7 +62,11 @@
 
 	</table>
 	  
-	<input type="submit" class="btn btn-success" value="Update Result" />
+	{% if user.is_authenticated %}
+	<input type="submit" class="btn btn-success" value="Add Result" />
+	{% else %}
+	<input type="submit" class="btn btn-success" value="Add Result" disabled/>
+	{% endif%}
 	</form>
 
 </div>

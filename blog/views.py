@@ -96,75 +96,75 @@ class AboutView(DetailView):
 
 #This function returns the Add Results page view.
 def add_results(request):
-    if request.user.is_authenticated():
-        num_games_display = 15
-        game = Game.objects.all().order_by('-timestamp')[:num_games_display]
-        GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
-        formset = GoalFormSet()
+    # if request.user.is_authenticated():
+    num_games_display = 15
+    game = Game.objects.all().order_by('-timestamp')[:num_games_display]
+    GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
+    formset = GoalFormSet()
 
-        if request.method == "POST":
-            form = GameForm(request.POST or None)
+    if request.method == "POST":
+        form = GameForm(request.POST or None)
 
-            if form.is_valid():
-                result = form.save(commit=False)
-                formset = GoalFormSet(request.POST or None, instance=result)
+        if form.is_valid():
+            result = form.save(commit=False)
+            formset = GoalFormSet(request.POST or None, instance=result)
 
-                if formset.is_valid():
-                    result.save()
-                    formset.save()
-                    messages.success(request, 'Results Added!')
-                    return redirect('add_results')
+            if formset.is_valid():
+                result.save()
+                formset.save()
+                messages.success(request, 'Results Added!')
+                return redirect('add_results')
 
-
-        else:
-            form = GameForm()
-            
-        context = {
-            'num_games_display': num_games_display,
-            'form': form,
-            'game': game,
-            'formset': formset
-        }
-
-        return render(request, 'blog/add_results.html', context)
 
     else:
-        return redirect('login')
+        form = GameForm()
+        
+    context = {
+        'num_games_display': num_games_display,
+        'form': form,
+        'game': game,
+        'formset': formset
+    }
+
+    return render(request, 'blog/add_results.html', context)
+
+    # else:
+    #     return redirect('login')
 
 #This functions allows result views to be editable. Update.
 def edit_results(request, pk):
-    if request.user.is_authenticated():
-        game = get_object_or_404(Game, pk=pk)
-        GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
-        formset = GoalFormSet(instance=game)
+    # if request.user.is_authenticated():
+    game = get_object_or_404(Game, pk=pk)
+    GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
+    formset = GoalFormSet(instance=game)
 
-        if request.method == "POST":
-            form = GameForm(request.POST or None, request.FILES, instance=game)
-        
+    if request.method == "POST":
+        form = GameForm(request.POST or None, request.FILES, instance=game)
+    
 
-            if form.is_valid():
-                result = form.save(commit=False)
-                formset = GoalFormSet(request.POST or None, request.FILES, instance=game)
+        if form.is_valid():
+            result = form.save(commit=False)
+            formset = GoalFormSet(request.POST or None, request.FILES, instance=game)
 
-                if formset.is_valid():
-                    result.save()
-                    formset.save()
-                    messages.success(request, 'Result Updated!')
-                    return redirect('/add_results/')
-
-        else:
-            form = GameForm(instance=game)
-            
-
-        context = {
-            'form': form,
-            'formset': formset,
-        }
-
-        return render(request, 'blog/edit_results.html', context)
+            if formset.is_valid():
+                result.save()
+                formset.save()
+                messages.success(request, 'Result Updated!')
+                return redirect('/add_results/')
 
     else:
-        return redirect('login')
+        form = GameForm(instance=game)
+        
+
+    context = {
+        'form': form,
+        'formset': formset,
+    }
+
+    return render(request, 'blog/edit_results.html', context)
+
+    # else:
+    #     return redirect('login')
 
 
 
