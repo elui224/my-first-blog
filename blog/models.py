@@ -290,9 +290,9 @@ class Game(models.Model):
 
 		for info in teams:
 			data['manager_name'].append(info.manager_name)
-			data['total_points'].append(int(info.total_points))
-			data['goals'].append(int(info.goals))
-			data['goal_diff'].append(int(info.goal_diff))
+			data['total_points'].append(int(info.total_points or 0)) #adding or 0 prevents NoneType error.
+			data['goals'].append(int(info.goals or 0))
+			data['goal_diff'].append(int(info.goal_diff or 0))
 			data['number_games'].append(info.number_games)
 			data['number_wins'].append(info.number_wins)
 			data['number_ties'].append(info.number_ties)

@@ -1,5 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -17,6 +18,21 @@ from .models import Post, Game, Team, Goal, Player
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+
+#This is a registration page.
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('/')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 #This view returns all the posts in descending order.
 class PostListView(ListView):
@@ -96,7 +112,6 @@ class AboutView(DetailView):
 
 #This function returns the Add Results page view.
 def add_results(request):
-    # if request.user.is_authenticated():
     num_games_display = 15
     game = Game.objects.all().order_by('-timestamp')[:num_games_display]
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
@@ -109,13 +124,13 @@ def add_results(request):
             result = form.save(commit=False)
             formset = GoalFormSet(request.POST or None, instance=result)
 
-            if formset.is_valid():
+            if all([gs.is_valid() for gs in formset]): #ensures all objects of formset is valid, if there are multiple objects.
                 result.save()
                 formset.save()
                 messages.success(request, 'Results Added!')
                 return redirect('add_results')
-
-
+            else:
+                messages.warning(request, 'There are errors.')
     else:
         form = GameForm()
         
@@ -128,12 +143,9 @@ def add_results(request):
 
     return render(request, 'blog/add_results.html', context)
 
-    # else:
-    #     return redirect('login')
 
 #This functions allows result views to be editable. Update.
 def edit_results(request, pk):
-    # if request.user.is_authenticated():
     game = get_object_or_404(Game, pk=pk)
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     formset = GoalFormSet(instance=game)
@@ -146,11 +158,13 @@ def edit_results(request, pk):
             result = form.save(commit=False)
             formset = GoalFormSet(request.POST or None, request.FILES, instance=game)
 
-            if formset.is_valid():
+            if all([gs.is_valid() for gs in formset]):
                 result.save()
                 formset.save()
                 messages.success(request, 'Result Updated!')
                 return redirect('/add_results/')
+            else:
+                messages.warning(request, 'There are errors.')
 
     else:
         form = GameForm(instance=game)
@@ -162,9 +176,6 @@ def edit_results(request, pk):
     }
 
     return render(request, 'blog/edit_results.html', context)
-
-    # else:
-    #     return redirect('login')
 
 
 

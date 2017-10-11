@@ -1,0 +1,23 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block head_title %} {{block.super}} | Register {% endblock head_title %}
+
+{% block content %}
+  <h2><a>Sign up</a></h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        
+        <!-- {{ field | as_crispy_field }} -->
+        {{ field.label_tag }}
+        {{ field }}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <button class="btn btn-success" type="submit">Sign up</button>
+  </form>
+{% endblock %}
