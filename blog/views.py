@@ -11,8 +11,8 @@ from django.utils import timezone
 from django.urls import reverse_lazy
 from django.core.urlresolvers import reverse
 from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView
-from .forms import PostForm, GameForm, GoalForm, BaseGoalFormSet
-from .models import Post, Game, Team, Goal, Player
+from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet
+from .models import Post, Game, Team, Goal, Player, Assist
 
 
 from rest_framework.views import APIView
@@ -116,6 +116,8 @@ def add_results(request):
     game = Game.objects.all().order_by('-timestamp')[:num_games_display]
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     formset = GoalFormSet()
+    AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
+    formset_assists = AssistFormSet()
 
     if request.method == "POST":
         form = GameForm(request.POST or None)
@@ -123,12 +125,15 @@ def add_results(request):
         if form.is_valid():
             result = form.save(commit=False)
             formset = GoalFormSet(request.POST or None, instance=result)
+            formset_assists = AssistFormSet(request.POST or None, instance=result)
 
             if all([gs.is_valid() for gs in formset]): #ensures all objects of formset is valid, if there are multiple objects.
-                result.save()
-                formset.save()
-                messages.success(request, 'Results Added!')
-                return redirect('add_results')
+                if all([gs_assist.is_valid() for gs_assist in formset_assists]):
+                    result.save()
+                    formset.save()
+                    formset_assists.save()
+                    messages.success(request, 'Results Added!')
+                    return redirect('add_results')
             else:
                 messages.warning(request, 'There are errors.')
     else:
@@ -138,7 +143,8 @@ def add_results(request):
         'num_games_display': num_games_display,
         'form': form,
         'game': game,
-        'formset': formset
+        'formset': formset,
+        'formset_assists': formset_assists,
     }
 
     return render(request, 'blog/add_results.html', context)
@@ -149,6 +155,8 @@ def edit_results(request, pk):
     game = get_object_or_404(Game, pk=pk)
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     formset = GoalFormSet(instance=game)
+    AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
+    formset_assists = AssistFormSet(instance=game)
 
     if request.method == "POST":
         form = GameForm(request.POST or None, request.FILES, instance=game)
@@ -157,12 +165,15 @@ def edit_results(request, pk):
         if form.is_valid():
             result = form.save(commit=False)
             formset = GoalFormSet(request.POST or None, request.FILES, instance=game)
+            formset_assists = AssistFormSet(request.POST or None, instance=result)
 
-            if all([gs.is_valid() for gs in formset]):
-                result.save()
-                formset.save()
-                messages.success(request, 'Result Updated!')
-                return redirect('/add_results/')
+            if all([gs.is_valid() for gs in formset]): #ensures all objects of formset is valid, if there are multiple objects.
+                if all([gs_assist.is_valid() for gs_assist in formset_assists]):
+                    result.save()
+                    formset.save()
+                    formset_assists.save()
+                    messages.success(request, 'Results Updated!')
+                    return redirect('/add_results/')
             else:
                 messages.warning(request, 'There are errors.')
 
@@ -173,6 +184,7 @@ def edit_results(request, pk):
     context = {
         'form': form,
         'formset': formset,
+        'formset_assists': formset_assists,
     }
 
     return render(request, 'blog/edit_results.html', context)

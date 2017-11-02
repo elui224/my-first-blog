@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.utils.safestring import mark_safe
-from .models import Post, Game, Player, Goal, Season
+from .models import Post, Game, Player, Goal, Season, Assist
 
 from crispy_forms.helper import FormHelper
 
@@ -63,6 +63,16 @@ class GoalForm(forms.ModelForm):
 		}
 
 
+class AssistForm(forms.ModelForm):
+
+	class Meta:
+		model = Assist
+		fields = ["player_name","num_assists"]
+		labels = {
+			'player_name': 'Assist Getter',
+			'num_assists': 'Total Assists',
+		}
+
 
 class BaseGoalFormSet(BaseInlineFormSet):
 
@@ -88,5 +98,28 @@ class BaseGoalFormSet(BaseInlineFormSet):
 		except AttributeError:
 			pass
 
+class BaseAssistFormSet(BaseInlineFormSet):
+
+	def clean(self, *args, **kwargs):
+		try:
+			super(BaseAssistFormSet, self).clean()
+			if any(self.errors):
+				return
+
+			player_names = []
+			num_assist = [] # need to validate sum of goal scorers is equal to goals of home + away teams. 
+			#Parent's form instance gets preserved before clean method gets called, so should be available
+
+			for form in self.forms:
+				if form.cleaned_data:
+					player_name = form.cleaned_data['player_name']
+
+					if player_name:
+						if player_name in player_names:
+							raise forms.ValidationError('Assist getters must be unique.')
+						player_names.append(player_name)
+
+		except AttributeError:
+			pass
 
 

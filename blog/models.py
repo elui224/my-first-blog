@@ -469,5 +469,49 @@ class Goal(models.Model):
 
 		return goal_against_rows
 
+class Assist(models.Model):
+	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
+	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
+	num_assists 	= models.PositiveIntegerField(null = True)
+
+	def __str__(self):
+		return '{} {}'.format("Assist",self.game) 
+
+
+	# def get_goal_against_data():
+
+	# 	query_player = '''
+	# 		SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
+	# 			SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
+	# 				when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
+	# 				when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
+	# 			FROM blog_player
+	# 			INNER JOIN
+	# 			blog_team ON blog_player.team_id = blog_team.id
+	# 			INNER JOIN 
+	# 			blog_goal ON blog_player.id = blog_goal.player_name_id
+	# 			INNER JOIN
+	# 			blog_game ON blog_game.id = blog_goal.game_id
+	# 			where player_team_rec_status = 'A'
+	# 			) data1
+	# 		INNER JOIN 
+	# 		blog_team ON data1.opponent = blog_team.id
+	# 		WHERE opponent is not null
+	# 		GROUP BY id, mgr, player, opponent_scored_on
+	# 		ORDER BY player, mgr, tot_goals
+	# 	'''
+
+	# 	goal_against_data = Player.objects.raw(query_player)
+
+	# 	goal_against_rows = []
+
+	# 	for row in goal_against_data:
+	# 		r = ({"id":row.id, "manager": row.mgr, "player": row.player, "mgr": row.opponent_scored_on, "goals": row.tot_goals})
+	# 		goal_against_rows.append(r)
+
+
+	# 	return goal_against_rows
+
+
 
 

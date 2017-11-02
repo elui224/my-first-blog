@@ -61,6 +61,50 @@
 			{% endfor %}
 
 	</table>
+
+
+	<table id='goal_set' class="table">
+		
+		{{ formset_assists.management_form }}
+
+		{% for assist_form in formset_assists %}
+
+	        {% if forloop.first %}
+	        <thead>
+		        <tr>
+		            {% for field in assist_form.visible_fields %}
+		            	<th>{{ field.label_tag }}</th>
+		            {% endfor %}
+		        </tr>
+	        </thead>
+	        {% endif %}
+		    
+		    <tbody>
+			    <tr class='rowset_row_assist'>
+
+		            {% for field in assist_form.visible_fields %}
+
+		                <td>
+		                	{% if forloop.first %}
+
+		                		{%  for hidden in assist_form.hidden_fields %}{{ hidden }}{% endfor %}
+		                		{% if assist_form.instance.pk %}{{ assist_form.DELETE }}{% endif %}
+
+		                	{% endif %}
+
+		                	<!-- {{ field|as_crispy_field}}  -->
+		                	{{ field }}{% if field.errors %} <span class = 'text-danger small'><strong>{{ field.errors|escape }}<strong> </span>{% endif %}
+		                
+		                </td>    
+
+		            {% endfor %}
+
+		        </tr>		
+			</tbody>
+		
+		{% endfor %}
+
+	</table>
 	  
 	{% if user.is_authenticated %}
 	<input type="submit" class="btn btn-success" value="Add Result" />
@@ -78,6 +122,12 @@
 	        addText: 'add another scorer',
 	        deleteText: 'remove',
 	        prefix: 'goal_set' //Must prefix for inline formsets.
+	    });
+
+	    $('.rowset_row_assist').formset({
+	        addText: 'add another assist',
+	        deleteText: 'remove',
+	        prefix: 'assist_set' //Must prefix for inline formsets.
 	    });
 	</script>
 
