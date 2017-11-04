@@ -28,10 +28,10 @@
 <script type="text/javascript">
 
 {% block jquery %}
-var endpoint = '/api/chart/playertotaldata/';
+//var endpoint = '/api/chart/playertotaldata/';
 $('#data-tables').DataTable({
 	paging: true,
-	order: [[1, "desc", 0, "asc" ]],
+	order: [[1, "desc"]],
 	lengthMenu: [[20, 30, -1], [20, 30, "All"]],
     ajax: {
         url: endpoint,
