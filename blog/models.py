@@ -147,7 +147,7 @@ class Player(models.Model):
 		tot_player_data = []
 
 		for row in tot_player_data_query:
-			r = ({"id":row.id, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
+			r = ({"player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
 			tot_player_data.append(r)
 
 		return tot_player_data
