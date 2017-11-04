@@ -11,6 +11,7 @@ from .views import  (
 		ChartSeasonData,
 		ChartHeadtoHeadData,
 		ChartPlayerData,
+		ChartTotPlayerData,
 		PostDetailView, 
 		PostListView, 
 		StatisticsView, 
@@ -43,6 +44,7 @@ urlpatterns = [
 	url(r'^api/chart/seasondata/$', ChartSeasonData.as_view()),
 	url(r'^api/chart/managerdata/$', ChartHeadtoHeadData.as_view()),
 	url(r'^api/chart/playerdata/$', ChartPlayerData.as_view()),
+	url(r'^api/chart/playertotaldata/$', ChartTotPlayerData.as_view()),
 	url(r'^add_results/$', views.add_results, name='add_results'),
 	url(r'^result/(?P<pk>[0-9]+)/$', views.edit_results, name='edit_results'),
 

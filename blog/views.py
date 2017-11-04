@@ -250,5 +250,14 @@ class ChartPlayerData(APIView):
         data = playerset
         return Response(data)
 
+class ChartTotPlayerData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+        playerdataset = Player.get_tot_player_data()
+        data = playerdataset
+        return Response(data)   
+
 
 
