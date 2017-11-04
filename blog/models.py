@@ -135,10 +135,10 @@ class Player(models.Model):
 	def get_tot_player_data():
 
 		query_player_tot = '''
-			select a.id, a.player_name, sum(b.num_goals) tot_goal, sum(c.num_assists) tot_assist from blog_player a
+			select a.player_name as id, sum(b.num_goals) tot_goal, sum(c.num_assists) tot_assist from blog_player a
 			left join blog_goal b on a.id = b.player_name_id
 			left join blog_assist c on a.id = c.player_name_id
-			group by a.id, a.player_name
+			group by a.id
 			order by a.player_name asc
 		'''
 	
@@ -147,7 +147,7 @@ class Player(models.Model):
 		tot_player_data = []
 
 		for row in tot_player_data_query:
-			r = ({"player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
+			r = ({"player": row.id, "goals": row.tot_goal, "assists": row.tot_assist})
 			tot_player_data.append(r)
 
 		return tot_player_data
