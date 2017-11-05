@@ -399,8 +399,81 @@ class Game(models.Model):
 	def get_headtohead_data():
 
 		query_headtohead = '''
-		SELECT goals.*, tot_assists FROM 
-			(
+		select 
+		 stats.player as id
+		, stats.opponent opponent
+		, sum(number_wins) wins
+		, sum(number_ties) ties
+		, sum(number_losses) losses
+		, sum(result) total_points
+		, sum(goal_diff) GD
+		, count(result) games
+			from (
+			select blog_game.id, t.manager_name as player, te.manager_name as opponent 
+			, your_result result
+			, case when blog_game.your_result = 3 then 1 else 0 end AS number_wins
+			, case when blog_game.your_result = 1 then 1 else 0 end AS number_ties
+			, case when blog_game.your_result = 0 then 1 else 0 end AS number_losses
+			, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
+
+			from blog_game
+			inner join blog_team t on blog_game.your_first_name_id = t.id
+			inner join blog_team te on blog_game.opponent_first_name_id = te.id
+
+			union all 
+
+			select blog_game.id, t.manager_name as player, te.manager_name as opponent 
+			, opponent_result result
+			, case when blog_game.opponent_result = 3 then 1 else 0 end AS number_wins
+			, case when blog_game.opponent_result = 1 then 1 else 0 end AS number_ties
+			, case when blog_game.opponent_result = 0 then 1 else 0 end AS number_losses
+			, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
+
+			from blog_game
+			inner join blog_team t on blog_game.opponent_first_name_id = t.id
+			inner join blog_team te on blog_game.your_first_name_id = te.id
+
+			) stats
+		group by stats.player, stats.opponent
+		'''
+
+		headtohead_data = Game.objects.raw(query_headtohead)
+
+		rows = []
+		for row in headtohead_data:
+			r = ({"player": row.id, "opponent": row.opponent, "wins": row.wins, "ties": row.ties, "losses": row.losses
+				, "points": row.total_points, "GD": row.GD, "games": row.games})
+			rows.append(r)
+
+		return rows
+
+#Returns the current game
+def get_default_game_number(): 
+	game_qs = Game.objects.all()
+	game_exists = game_qs.exists()
+
+	if game_exists:
+		current_game_object = Game.objects.latest('id')
+		
+	else:
+		current_game_object = None
+
+	return current_game_object
+
+
+class Goal(models.Model):
+	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
+	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
+	num_goals 	= models.PositiveIntegerField(null = True)
+
+	def __str__(self):
+		return '{} {}'.format("Game",self.game) 
+
+
+	def get_goal_against_data():
+
+		query_player = '''
+		SELECT goals.*, tot_assists FROM (
 			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
 					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
 						when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
@@ -419,8 +492,8 @@ class Game(models.Model):
 				WHERE opponent is not null
 				GROUP BY id, mgr, player, opponent_scored_on
 				ORDER BY player, mgr, tot_goals
-				) goals				
-			LEFT JOIN			
+				) goals			
+			LEFT JOIN		
 			(
 			SELECT player, blog_team.manager_name opponent_scored_on,sum(num_assists) tot_assists FROM (
 					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_assist.num_assists, case 
@@ -463,90 +536,7 @@ class Game(models.Model):
 			blog_team ON data1.opponent = blog_team.id
 			WHERE opponent is not null
 			GROUP BY id, mgr, player, opponent_scored_on
-			ORDER BY player			
-		'''
-
-		headtohead_data = Game.objects.raw(query_headtohead)
-
-		rows = []
-		for row in headtohead_data:
-			r = ({"player": row.id, "opponent": row.opponent, "wins": row.wins, "ties": row.ties, "losses": row.losses
-				, "points": row.total_points, "GD": row.GD, "games": row.games})
-			rows.append(r)
-
-		return rows
-
-#Returns the current game
-def get_default_game_number(): 
-	game_qs = Game.objects.all()
-	game_exists = game_qs.exists()
-
-	if game_exists:
-		current_game_object = Game.objects.latest('id')
-		
-	else:
-		current_game_object = None
-
-	return current_game_object
-
-
-class Goal(models.Model):
-	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
-	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
-	num_goals 	= models.PositiveIntegerField(null = True)
-
-	def __str__(self):
-		return '{} {}'.format("Game",self.game) 
-
-
-	def get_goal_against_data():
-
-		query_player = '''
-		select goals.*, assists.tot_assists from (
-			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
-					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
-						when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
-						when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
-					FROM blog_player
-					INNER JOIN
-					blog_team ON blog_player.team_id = blog_team.id
-					INNER JOIN 
-					blog_goal ON blog_player.id = blog_goal.player_name_id
-					INNER JOIN
-					blog_game ON blog_game.id = blog_goal.game_id
-					where player_team_rec_status = 'A'
-					) data1
-				INNER JOIN 
-				blog_team ON data1.opponent = blog_team.id
-				WHERE opponent is not null
-				GROUP BY id, mgr, player, opponent_scored_on
-				ORDER BY player, mgr, tot_goals
-				) goals
-				
-			left outer join
-			
-			(
-			SELECT player, blog_team.manager_name opponent_scored_on,sum(num_assists) tot_assists FROM (
-					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_assist.num_assists, case 
-						when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
-						when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
-					FROM blog_player
-					INNER JOIN
-					blog_team ON blog_player.team_id = blog_team.id
-					INNER JOIN 
-					blog_assist ON blog_player.id = blog_assist.player_name_id
-					INNER JOIN
-					blog_game ON blog_game.id = blog_assist.game_id
-					where player_team_rec_status = 'A'
-					) data1
-				INNER JOIN 
-				blog_team ON data1.opponent = blog_team.id
-				WHERE opponent is not null
-				GROUP BY player,opponent_scored_on
-				ORDER BY player
-				) assists
-			on goals.player = assists.player
-			and goals.opponent_scored_on = assists.opponent_scored_on
+			ORDER BY player
 	'''
 	
 		goal_against_data = Player.objects.raw(query_player)
