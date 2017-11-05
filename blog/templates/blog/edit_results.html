@@ -20,7 +20,7 @@
 
 		{{ form|crispy }}
 
-	    <table id='goal_set' class="table">
+	<table id='goal_set' class="table">
 		
 		{{ formset.management_form }}
 
@@ -93,7 +93,7 @@
 		                	{% endif %}
 
 		                	<!-- {{ field|as_crispy_field}}  -->
-		                	{{ field }}{% if field.errors %} <span class = 'text-danger small'><strong>{{ field.errors|escape }}<strong> </span>{% endif %}
+		                	{{ field }} {%if field.errors%} {{ field.errors|escape }} {% endif %}
 		                
 		                </td>    
 
