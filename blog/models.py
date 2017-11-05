@@ -473,7 +473,7 @@ class Goal(models.Model):
 	def get_goal_against_data():
 
 		query_player = '''
-		SELECT goals.*, tot_assists FROM (
+		SELECT goals.*, tot_assists from (
 			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
 					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
 						when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
@@ -492,8 +492,10 @@ class Goal(models.Model):
 				WHERE opponent is not null
 				GROUP BY id, mgr, player, opponent_scored_on
 				ORDER BY player, mgr, tot_goals
-				) goals			
-			LEFT JOIN		
+				) goals
+			
+			LEFT JOIN
+			
 			(
 			SELECT player, blog_team.manager_name opponent_scored_on,sum(num_assists) tot_assists FROM (
 					SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_assist.num_assists, case 
@@ -516,10 +518,12 @@ class Goal(models.Model):
 				) assists
 			ON goals.player = assists.player
 			AND goals.opponent_scored_on = assists.opponent_scored_on
-			
-			UNION ALL
-			
-			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on,null tot_goals, sum(num_assists) tot_assists FROM (
+		
+		UNION ALL
+		
+		SELECT assists2.id, assists2.mgr, assists2.player, assists2.opponent_scored_on, goals2.tot_goals, assists2.tot_assists 
+		FROM (
+			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_assists) tot_assists FROM (
 				SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_assist.num_assists, case 
 					when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
 					when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
@@ -537,6 +541,34 @@ class Goal(models.Model):
 			WHERE opponent is not null
 			GROUP BY id, mgr, player, opponent_scored_on
 			ORDER BY player
+			) assists2
+			
+			LEFT JOIN
+			
+			(
+			SELECT player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
+				SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
+					when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
+					when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
+				FROM blog_player
+				INNER JOIN
+				blog_team ON blog_player.team_id = blog_team.id
+				INNER JOIN 
+				blog_goal ON blog_player.id = blog_goal.player_name_id
+				INNER JOIN
+				blog_game ON blog_game.id = blog_goal.game_id
+				where player_team_rec_status = 'A'
+				) data1
+			INNER JOIN 
+			blog_team ON data1.opponent = blog_team.id
+			WHERE opponent is not null
+			GROUP BY player, opponent_scored_on
+			ORDER BY player, tot_goals
+			) goals2
+			
+		ON assists2.player = goals2.player
+		AND assists2.opponent_scored_on = goals2.opponent_scored_on
+		WHERE tot_goals is NULL
 	'''
 	
 		goal_against_data = Player.objects.raw(query_player)
