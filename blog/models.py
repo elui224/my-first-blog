@@ -135,11 +135,26 @@ class Player(models.Model):
 	def get_tot_player_data():
 
 		query_player_tot = '''
-			select a.player_name as id, sum(b.num_goals) tot_goal, sum(c.num_assists) tot_assist from blog_player a
-			left join blog_goal b on a.id = b.player_name_id
-			left join blog_assist c on a.id = c.player_name_id
-			group by a.id
-			order by a.player_name asc
+		SELECT id, player_name, tot_goal, tot_assist 
+		FROM (
+			SELECT id, player_name 
+			FROM blog_player
+			) player
+		LEFT JOIN
+		(
+			SELECT player_name_id, sum(num_goals) tot_goal 
+			FROM blog_goal
+			group by player_name_id
+		) goal
+		ON player.id = goal.player_name_id
+		LEFT JOIN
+		(
+			SELECT player_name_id, sum(num_assists) tot_assist 
+			FROM blog_assist
+			group by player_name_id
+		) assist
+		ON player.id = assist.player_name_id
+		order by tot_goal desc
 		'''
 	
 		tot_player_data_query = Player.objects.raw(query_player_tot)
@@ -147,7 +162,7 @@ class Player(models.Model):
 		tot_player_data = []
 
 		for row in tot_player_data_query:
-			r = ({"player": row.id, "goals": row.tot_goal, "assists": row.tot_assist})
+			r = ({"id": row.id, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
 			tot_player_data.append(r)
 
 		return tot_player_data
