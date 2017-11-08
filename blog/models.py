@@ -196,8 +196,9 @@ def get_current_year_number():
 
 
 class Season(models.Model):
-	fifa_year 		= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
-	season_number 	= models.PositiveIntegerField()
+	fifa_year 			= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE) 
+	season_number 		= models.PositiveIntegerField()
+	special_season_ind	= models.IntegerField(default=0)
 
 	def __str__(self):
 		return '{} {}'.format('Season', self.season_number)
@@ -242,6 +243,7 @@ def get_default_season_number():
 
 
 class Game(models.Model):
+	author_game 			= models.ForeignKey('auth.User')
 	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
 	your_first_name 		= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
 	opponent_first_name 	= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
@@ -255,9 +257,9 @@ class Game(models.Model):
 	def __str__(self):
 		return '{} vs {}'.format(self.your_first_name.manager_name, self.opponent_first_name.manager_name) 
 
+	def save(self, *args, **kwargs):
 	#Converts your_result and opponent_result attribute based on form inputs by 
 	#overriding save method of form.
-	def save(self, *args, **kwargs):
 
 		if self.your_score > self.opponent_score:
 			self.your_result = 3
@@ -270,8 +272,9 @@ class Game(models.Model):
 			self.opponent_result = 1
 		super(Game, self).save(*args, **kwargs)
 
-	#add method to return game data to populate data display.
 	def get_game_data():
+	#add method to return game data to populate overall total data display.
+	#populates the chartJS
 
 		data = {
 		'number_games': [],
@@ -336,7 +339,7 @@ class Game(models.Model):
 		return data
 
 	def get_season_game_data():
-
+		#This function returns raw SQL to populate the seasons datatable.
 		query_season = '''
 		SELECT 
 			id
@@ -397,7 +400,7 @@ class Game(models.Model):
 		return rows
 
 	def get_headtohead_data():
-
+		#This function returns raw SQL to populate the head to head games datatable.
 		query_headtohead = '''
 		select 
 		 stats.player as id
@@ -471,7 +474,7 @@ class Goal(models.Model):
 
 
 	def get_goal_against_data():
-
+		#This function returns raw SQL to populate the head to head players datatable.
 		query_player = '''
 		SELECT goals.*, tot_assists from (
 			SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
@@ -589,42 +592,4 @@ class Assist(models.Model):
 
 	def __str__(self):
 		return '{} {}'.format("Assist",self.game) 
-
-
-	# def get_goal_against_data():
-
-	# 	query_player = '''
-	# 		SELECT id, mgr, player, blog_team.manager_name opponent_scored_on, sum(num_goals) tot_goals FROM (
-	# 			SELECT blog_player.player_name player, blog_team.manager_name mgr, blog_goal.num_goals, case 
-	# 				when blog_player.team_id = blog_game.opponent_first_name_id then blog_game.your_first_name_id 
-	# 				when blog_player.team_id = blog_game.your_first_name_id then blog_game.opponent_first_name_id end opponent
-	# 			FROM blog_player
-	# 			INNER JOIN
-	# 			blog_team ON blog_player.team_id = blog_team.id
-	# 			INNER JOIN 
-	# 			blog_goal ON blog_player.id = blog_goal.player_name_id
-	# 			INNER JOIN
-	# 			blog_game ON blog_game.id = blog_goal.game_id
-	# 			where player_team_rec_status = 'A'
-	# 			) data1
-	# 		INNER JOIN 
-	# 		blog_team ON data1.opponent = blog_team.id
-	# 		WHERE opponent is not null
-	# 		GROUP BY id, mgr, player, opponent_scored_on
-	# 		ORDER BY player, mgr, tot_goals
-	# 	'''
-
-	# 	goal_against_data = Player.objects.raw(query_player)
-
-	# 	goal_against_rows = []
-
-	# 	for row in goal_against_data:
-	# 		r = ({"id":row.id, "manager": row.mgr, "player": row.player, "mgr": row.opponent_scored_on, "goals": row.tot_goals})
-	# 		goal_against_rows.append(r)
-
-
-	# 	return goal_against_rows
-
-
-
 

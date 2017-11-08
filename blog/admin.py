@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Team, Player, Year, Season, Game, Goal
+from .models import Post, Team, Player, Year, Season, Game, Goal, Assist
 
 
 # This customizes the admin panel.
@@ -41,7 +41,7 @@ class SeasonModelAdmin(admin.ModelAdmin):
 
 class GameModelAdmin(admin.ModelAdmin):
 	list_display = ["your_first_name","opponent_first_name","your_score","opponent_score",
-		"season_number","timestamp",]
+		"season_number","timestamp","author_game"]
 	list_filter = ["timestamp"]
 	search_fields = ["season_number__season_number",]
 
@@ -55,6 +55,13 @@ class GoalModelAdmin(admin.ModelAdmin):
 	class Meta:
 		model = Goal
 
+class AssistModelAdmin(admin.ModelAdmin):
+	list_display = ["player_name","game","num_assists"]
+	search_fields = ["player_name__player_name"]
+
+	class Meta:
+		model = Assist
+
 
 admin.site.register(Post, PostModelAdmin)
 admin.site.register(Team, TeamModelAdmin)
@@ -63,6 +70,6 @@ admin.site.register(Year, YearModelAdmin)
 admin.site.register(Season, SeasonModelAdmin)
 admin.site.register(Game, GameModelAdmin)
 admin.site.register(Goal, GoalModelAdmin)
-
+admin.site.register(Assist, AssistModelAdmin)
 
 
