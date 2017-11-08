@@ -124,11 +124,13 @@ def add_results(request):
 
         if form.is_valid():
             result = form.save(commit=False)
+            result.author_game = request.user           
             formset = GoalFormSet(request.POST or None, instance=result)
             formset_assists = AssistFormSet(request.POST or None, instance=result)
 
             if all([gs.is_valid() for gs in formset]): #ensures all objects of formset is valid, if there are multiple objects.
                 if all([gs_assist.is_valid() for gs_assist in formset_assists]):
+
                     result.save()
                     formset.save()
                     formset_assists.save()
@@ -164,8 +166,9 @@ def edit_results(request, pk):
 
         if form.is_valid():
             result = form.save(commit=False)
+            result.author_game = request.user 
             formset = GoalFormSet(request.POST or None, request.FILES, instance=game)
-            formset_assists = AssistFormSet(request.POST or None, instance=result)
+            formset_assists = AssistFormSet(request.POST or None, instance=game)
 
             if all([gs.is_valid() for gs in formset]): #ensures all objects of formset is valid, if there are multiple objects.
                 if all([gs_assist.is_valid() for gs_assist in formset_assists]):
@@ -189,6 +192,7 @@ def edit_results(request, pk):
 
     return render(request, 'blog/edit_results.html', context)
 
+#This view allows games (results) to be deleted.
 def delete_results(request, pk=None):
     game = get_object_or_404(Game, pk=pk)
     game.delete()

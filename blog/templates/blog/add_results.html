@@ -10,7 +10,10 @@
 
 <div>
 	<h2><a>{% block title %}Add Results{% endblock %}</a></h2> 
+		<p>Logged in as <b>{{request.user}}</b></p>
 		<p>Complete the required fields (*) and click Add Result. Adding goal scorers-- Goal Scorer and Total Goals-- is not required. If you provide a Goal Scorer, you must provide the corresponding Total Goals. Same applies for the Assists Getter section. The information added here will populate <a href="{% url 'statistics' %}">Statistics.</a></p>
+
+
 </div>
 
 <div class = "well">
@@ -121,7 +124,7 @@
 <div>
 	{% if game %}
 		<h2><a id="anchor2">Game Log (Last {{ num_games_display }} Games)</a></h2>
-		<p>To edit a past result, click the pencil icon <i class="fa fa-pencil" aria-hidden="true"></i> beside the game.</p>
+		<p>To edit a past result, click the pencil icon <i class="fa fa-pencil" aria-hidden="true"></i> beside the game. To delete a past result, click the trash icon <i class="fa fa-trash-o" aria-hidden="true"></i> beside the game. </p>
 		<div class="table-responsive">
 			<table class='table table-hover'>
 				<thead>
