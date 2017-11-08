@@ -129,7 +129,10 @@
 						<th>Game</th>
 						<th>Score</th>
 						<th>Season</th>	
-						<th>Edit Result</th>		
+						<th>Edit Result</th>
+						{% if user.is_authenticated %}
+						<th>Delete Result</th>	
+						{% endif %}	
 					</tr>
 				</thead>
 
@@ -142,6 +145,9 @@
 						<td>score: {{instance.your_score}} - {{instance.opponent_score}}</td>
 						<td>{{instance.season_number}}</td>
 						<td> <a href="{% url 'edit_results' instance.pk %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+						{% if user.is_authenticated %}
+						<td> <a href="{% url 'delete_results' instance.pk %}" onclick="return confirm('Are you sure?')"><i class="fa fa-trash-o" aria-hidden="true"></i></a></td>
+						{% endif %}
 					</tr>
 				</tbody>
 				{% endfor %}

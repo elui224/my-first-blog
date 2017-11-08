@@ -47,6 +47,7 @@ urlpatterns = [
 	url(r'^api/chart/playertotaldata/$', ChartTotPlayerData.as_view()),
 	url(r'^add_results/$', views.add_results, name='add_results'),
 	url(r'^result/(?P<pk>[0-9]+)/$', views.edit_results, name='edit_results'),
+	url(r'^delete_result/(?P<pk>[0-9]+)/$', views.delete_results, name='delete_results'),
 
 ]
 

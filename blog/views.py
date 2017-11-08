@@ -112,7 +112,7 @@ class AboutView(DetailView):
 
 #This function returns the Add Results page view.
 def add_results(request):
-    num_games_display = 15
+    num_games_display = 30
     game = Game.objects.all().order_by('-timestamp')[:num_games_display]
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     formset = GoalFormSet()
@@ -189,7 +189,11 @@ def edit_results(request, pk):
 
     return render(request, 'blog/edit_results.html', context)
 
-
+def delete_results(request, pk=None):
+    game = get_object_or_404(Game, pk=pk)
+    game.delete()
+    messages.success(request, 'Result Deleted!')
+    return redirect('add_results')
 
 #This class view renders the statistics page.
 class StatisticsView(TemplateView):
