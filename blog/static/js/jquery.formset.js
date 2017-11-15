@@ -173,7 +173,7 @@
             // FIXME: Perhaps using $.data would be a better idea?
             options.formTemplate = template;
 
-            if ($$.is('TR')) {
+            if ($$.is('T')) { //it was .is('TR')) but a add and remove placed after each row if multiple rows. 
                 // If forms are laid out as table rows, insert the
                 // "add" button in a new table row:
                 var numCols = $$.eq(0).children().length,   // This is a bit of an assumption :|

@@ -4,15 +4,34 @@
 
 {% block content %}
 <div>
-	<ul class="nav nav-tabs nav-justified">
-	  <li><a href="{% url 'statistics' %}">Overall</a></li>
-	  <li><a href="{% url 'statistics_season'%}">Season</a></li>
-	  <li><a href="{% url 'statistics_h2h'%}">Head to Head</a></li>
-	  <li><a href="{% url 'statistics_player'%}">Player</a></li>
+	<ul class="nav nav-tabs nav-justified" id="myTab">
+	  <li><a href="{% url 'statistics' %}" >Overall</a></li>
+	  <li><a href="{% url 'statistics_season'%}" >Season</a></li>
+	  <li><a href="{% url 'statistics_h2h'%}" >Head to Head</a></li>
+	  <li><a href="{% url 'statistics_player'%}" >Player</a></li>
+<!-- 	  <li><a href="#aaa" data-toggle="tab">Overall</a></li>
+	  <li><a href="#bbb" data-toggle="tab">Season</a></li>
+	  <li><a href="{% url 'statistics_h2h'%}" data-toggle="tab">Head to Head</a></li>
+	  <li><a href="{% url 'statistics_player'%}" data-toggle="tab">Player</a></li> -->
+
+
 	</ul>
 </div>
 
 {% block statscontent %}{% endblock %}	
+
+
+<script>
+$('#myTab a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+
+$('#myTab a[href="#profile"]').tab('show') // Select tab by name
+$('#myTab a:first').tab('show') // Select first tab
+$('#myTab a:last').tab('show') // Select last tab
+$('#myTab li:eq(2) a').tab('show')
+</script>
 
 {% endblock %}
 

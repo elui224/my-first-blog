@@ -593,3 +593,52 @@ class Assist(models.Model):
 	def __str__(self):
 		return '{} {}'.format("Assist",self.game) 
 
+
+
+# SELECT *, case when special_season_ind = 0 then rnk else rnk * 2 end lounge_pts FROM (
+		
+# 		SELECT 
+# 			manager_name, 
+# 			season_number, 
+# 			special_season_ind,
+# 			gd,
+# 			pts,
+# 			@manager_name:=CASE WHEN @season_number <> season_number THEN concat(LEFT(@season_number:=season_number, 0), 1) ELSE @manager_name+1 END AS rnk
+# 		FROM
+# 		(SELECT @manager_name:=-1) m,
+# 		(SELECT @season_number:= -1) s,		
+# 		(SELECT manager_name, season_number, special_season_ind, sum(goal_diff) gd, sum(total_points) pts
+# 			FROM
+# 			 (
+# 				SELECT 
+# 					blog_team.id
+# 					, blog_team.manager_name
+# 					, blog_team.rec_status
+# 					, blog_game.your_result AS total_points 
+# 					, blog_game.your_score AS goals
+# 					, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
+# 					, blog_season.season_number
+# 					, blog_season.special_season_ind
+# 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id)  
+# 				LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+				
+# 				UNION ALL 
+	
+# 				SELECT 
+# 					blog_team.id
+# 					, blog_team.manager_name
+# 					, blog_team.rec_status
+# 					, blog_game.opponent_result AS total_points 
+# 					, blog_game.opponent_score AS goals
+# 					, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
+# 					, blog_season.season_number
+# 					, blog_season.special_season_ind
+# 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
+# 				LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+# 				) inner_tab
+# 			GROUP BY season_number,manager_name,special_season_ind	
+# 			ORDER BY season_number, pts
+# 			) tots	
+# 			) T	
+
+

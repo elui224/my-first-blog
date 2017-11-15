@@ -99,6 +99,10 @@ html {
   padding-top: 15px;
 }
 
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
 /*This displays the radio button options horizontally.*/
 /*.radio {
   display:inline-block;
