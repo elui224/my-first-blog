@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.utils.safestring import mark_safe
-from .models import Post, Game, Player, Goal, Season, Assist
+from .models import Post, Game, Player, Goal, Season, Assist, SeasonPoint, Team
 
 from crispy_forms.helper import FormHelper
 
@@ -122,4 +122,16 @@ class BaseAssistFormSet(BaseInlineFormSet):
 		except AttributeError:
 			pass
 
+class SeasonPointForm(forms.ModelForm):
 
+	class Meta:
+		model = SeasonPoint
+		fields = ["manager_name","season_points","season_number"]
+		labels = {
+			'manager_name': 'Name',
+			'season_points': 'Total Season Points',
+			'season_number': 'Season Number',
+		}
+
+# SeasonPointFormset = inlineformset_factory(Team,
+#                                             form=SeasonPointForm, extra=1)

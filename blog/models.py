@@ -179,18 +179,12 @@ def get_current_year_number():
 	year_qs = Year.objects.all()
 	year_exists = year_qs.exists()
 	if year_exists:
+		# prev_year_object = Year.objects.all().order_by('-fifa_year')[1]
 		current_year_object = Year.objects.latest('fifa_year')
-		set_action_date = "2017-07-12 16:55:00" #yyyy/mm/dd h:m:s  #release date of fifa18.
-		date_format = "%Y-%m-%d %H:%M:%S"
-		now = datetime.now().strftime(date_format)
-		# fifa_release_date = datetime.strptime(set_action_date, date_format) 
-		current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
-		if datetime.now().strftime(date_format) == set_action_date:
-			next_fifa_year = current_fifa_year + 1
-			Year.objects.create(fifa_year=next_fifa_year)
-			default_year_object = current_year_object
-	else:
-		default_year_object = Year.objects.create(fifa_year=1)
+		# current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
+		# next_fifa_year = current_fifa_year + 1
+		# Year.objects.create(fifa_year=next_fifa_year)
+		default_year_object = current_year_object
 	return default_year_object
 
 
@@ -208,22 +202,38 @@ class Season(models.Model):
 def get_default_season_number(): 
 #Returns the current season based on number of games played to display.
 	active_teams_count = Team.get_active_teams_count()
+	# active_teams_count = 4
 	season_games_against_opponent = 2
 	opponents_per_season = active_teams_count - 1
-	total_games_per_season = active_teams_count * season_games_against_opponent * opponents_per_season / 2
 
-	season_qs = Season.objects.all()
-	season_exists = season_qs.exists()
+	prev_season_object = Season.objects.all().order_by('-season_number')[1]
+	current_season_object = Season.objects.latest('season_number')
 
-	if season_exists:
-		prev_season_object = Season.objects.all().order_by('-season_number')[1]
-		current_season_object = Season.objects.latest('season_number')
+	current_season_number = Season.objects.all().aggregate(Max('season_number'))['season_number__max']
+	prev_season_game_count = Game.objects.filter(season_number__season_number = current_season_number - 1).count()
+	current_season_game_count = Game.objects.filter(season_number__season_number = current_season_number ).count()
 
-		current_season_number = Season.objects.all().aggregate(Max('season_number'))['season_number__max']
-		prev_season_game_count = Game.objects.filter(season_number__season_number = current_season_number - 1).count()
-		current_season_game_count = Game.objects.filter(season_number__season_number = current_season_number ).count()
-		
-		if prev_season_game_count < total_games_per_season:
+	'''
+	Determines the number of games in the season.
+	The total_games_per_season is a variable used for logical comparison below.
+	Special seasons have a different number of games than regular seasons.
+	'''
+	if (prev_season_object.special_season_ind == 0 and current_season_game_count == 0) or (current_season_object.special_season_ind == 0 and prev_season_object.special_season_ind == 1 and current_season_game_count > 0 and prev_season_game_count > 0):
+		total_games_per_season = active_teams_count * season_games_against_opponent * opponents_per_season / 2
+	else:
+		gm_round_one = 4 * active_teams_count / 2 # four games per person. Divide by 2 for unique games in round 1.
+		gm_consolation = 1 * 2 / 2 # 1 game per person. Divide by 2 for unique games.
+		gm_semi = 1 * 4 / 2 #Divide by 2 for unique games.
+		gm_finals = gm_consolation
+		gm_second_place = gm_consolation
+		num_games_special_season = gm_round_one + gm_consolation + gm_semi + gm_finals + gm_second_place
+		total_games_per_season = num_games_special_season
+		# total_games_per_season = 3
+
+	season_exists = Season.objects.all().exists()
+
+	if season_exists: #Determines the season number to prepopulate each game form. The season number field is hidden.			
+		if prev_season_game_count < total_games_per_season and prev_season_object.special_season_ind == 0:
 			default_season_number = prev_season_object
 
 		elif current_season_game_count < total_games_per_season:
@@ -233,7 +243,11 @@ def get_default_season_number():
 			#create new instance of Season. Increment default_season_number by 1.
 			current_fifa_year_id = Year.objects.latest('id') 
 			next_season = current_season_number + 1
-			Season.objects.create(season_number=next_season, fifa_year=current_fifa_year_id)
+			if next_season % 4 == 0: #This determines if the new object will be a special season or not. Special seasons happen every four years.
+				special_season = 1
+			else:
+				special_season = 0
+			Season.objects.create(season_number=next_season, fifa_year=current_fifa_year_id, special_season_ind = special_season)
 			default_season_number = current_season_object
 			
 	else:
@@ -284,43 +298,51 @@ class Game(models.Model):
 		'number_wins':[],
 		'number_ties':[],
 		'number_losses':[],
-		'manager_name':[]
+		'manager_name':[],
+		'ovr_season_pts':[],
+		'GA':[]
 		}
 
 		query = '''
-		SELECT id, 
-			manager_name
-			, rec_status
-			, sum(total_points) AS total_points
-			, sum(goals) AS goals
-			, sum(goal_diff) AS goal_diff
-			, count(total_points) AS number_games 
-			, sum(case when total_points = 3 then 1 end) AS number_wins
-			, sum(case when total_points = 1 then 1 end) AS number_ties
-			, sum(case when total_points = 0 then 1 end) AS number_losses
-		FROM (
-			SELECT 
-				blog_team.id
-				, blog_team.manager_name
-				, blog_team.rec_status
-				, blog_game.your_result AS total_points 
-				, blog_game.your_score AS goals
-				, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
-			FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id) 
+		SELECT data.*, goals - goal_diff GA, seasonpoint.ovr_season_pts from (	
+			SELECT id, 
+				manager_name
+				, rec_status
+				, sum(total_points) AS total_points
+				, sum(goals) AS goals
+				, sum(goal_diff) AS goal_diff
+				, count(total_points) AS number_games 
+				, sum(case when total_points = 3 then 1 end) AS number_wins
+				, sum(case when total_points = 1 then 1 end) AS number_ties
+				, sum(case when total_points = 0 then 1 end) AS number_losses
+			FROM (
+				SELECT 
+					blog_team.id
+					, blog_team.manager_name
+					, blog_team.rec_status
+					, blog_game.your_result AS total_points 
+					, blog_game.your_score AS goals
+					, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
+				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id) 
 
-			UNION ALL 
+				UNION ALL 
 
-			SELECT 
-				blog_team.id
-				, blog_team.manager_name
-				, blog_team.rec_status
-				, blog_game.opponent_result AS total_points 
-				, blog_game.opponent_score AS goals
-				, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
-			FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
-		) AGGREGATED 
-		WHERE rec_status = 'A'
-		GROUP BY id, manager_name, rec_status
+				SELECT 
+					blog_team.id
+					, blog_team.manager_name
+					, blog_team.rec_status
+					, blog_game.opponent_result AS total_points 
+					, blog_game.opponent_score AS goals
+					, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
+				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
+			) AGGREGATED 
+			WHERE rec_status = 'A'
+			GROUP BY id, manager_name, rec_status
+			) data
+		LEFT OUTER JOIN
+		(
+		select manager_name_id, sum(season_points) ovr_season_pts from blog_seasonpoint GROUP BY manager_name_id
+		) seasonpoint ON data.id = seasonpoint.manager_name_id
 		'''
 
 		teams = Team.objects.raw(query)
@@ -335,7 +357,8 @@ class Game(models.Model):
 			data['number_wins'].append(info.number_wins)
 			data['number_ties'].append(info.number_ties)
 			data['number_losses'].append(info.number_losses)
-
+			data['ovr_season_pts'].append(int(info.ovr_season_pts or 0))
+			data['GA'].append(int(info.GA or 0))
 		return data
 
 	def get_season_game_data():
@@ -594,51 +617,14 @@ class Assist(models.Model):
 		return '{} {}'.format("Assist",self.game) 
 
 
+class SeasonPoint(models.Model):
+	manager_name = models.ForeignKey(Team, on_delete = models.CASCADE)
+	season_points 	= models.PositiveIntegerField()
+	season_number 	= models.ForeignKey(Season,  default = get_default_season_number, on_delete = models.CASCADE) 
 
-# SELECT *, case when special_season_ind = 0 then rnk else rnk * 2 end lounge_pts FROM (
-		
-# 		SELECT 
-# 			manager_name, 
-# 			season_number, 
-# 			special_season_ind,
-# 			gd,
-# 			pts,
-# 			@manager_name:=CASE WHEN @season_number <> season_number THEN concat(LEFT(@season_number:=season_number, 0), 1) ELSE @manager_name+1 END AS rnk
-# 		FROM
-# 		(SELECT @manager_name:=-1) m,
-# 		(SELECT @season_number:= -1) s,		
-# 		(SELECT manager_name, season_number, special_season_ind, sum(goal_diff) gd, sum(total_points) pts
-# 			FROM
-# 			 (
-# 				SELECT 
-# 					blog_team.id
-# 					, blog_team.manager_name
-# 					, blog_team.rec_status
-# 					, blog_game.your_result AS total_points 
-# 					, blog_game.your_score AS goals
-# 					, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
-# 					, blog_season.season_number
-# 					, blog_season.special_season_ind
-# 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id)  
-# 				LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
-				
-# 				UNION ALL 
-	
-# 				SELECT 
-# 					blog_team.id
-# 					, blog_team.manager_name
-# 					, blog_team.rec_status
-# 					, blog_game.opponent_result AS total_points 
-# 					, blog_game.opponent_score AS goals
-# 					, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
-# 					, blog_season.season_number
-# 					, blog_season.special_season_ind
-# 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
-# 				LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
-# 				) inner_tab
-# 			GROUP BY season_number,manager_name,special_season_ind	
-# 			ORDER BY season_number, pts
-# 			) tots	
-# 			) T	
+
+	def __str__(self):
+		return '{} {}'.format("Season Point",self.manager_name) 
+
 
 

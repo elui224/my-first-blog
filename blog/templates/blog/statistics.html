@@ -10,7 +10,8 @@ $.ajax({
 	url: endpoint,
 	success: function(data){
 		labels = data.manager_name
-		defaultData_points = data.total_points
+		defaultData_points = data.total_points //This represents game points
+		defaultData_ovr_season_pts = data.ovr_season_pts
 		defaultData_wins = data.number_wins
 		defaultData_ties = data.number_ties
 		defaultData_losses = data.number_losses
@@ -33,8 +34,8 @@ function renderChart() {
 	    data: {
 	        labels: labels,
 	        datasets: [{
-	            label: 'Points',
-	            data: defaultData_points,
+	            label: 'Overall Season Points',
+	            data: defaultData_ovr_season_pts,
 	            backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255,99,132,1)',
                 borderWidth: setBorderWidth

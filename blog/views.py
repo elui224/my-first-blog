@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import inlineformset_factory
@@ -10,9 +11,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.core.urlresolvers import reverse
-from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView
-from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet
-from .models import Post, Game, Team, Goal, Player, Assist
+from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView, FormView
+from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet, SeasonPointForm
+from .models import Post, Game, Team, Goal, Player, Assist, SeasonPoint
 
 
 from rest_framework.views import APIView
@@ -267,5 +268,24 @@ class ChartTotPlayerData(APIView):
         data = playerdataset
         return Response(data)   
 
+class SeasonPointView(LoginRequiredMixin, SuccessMessageMixin, FormView):
+    template_name = 'blog/season_point.html'
+    form_class = SeasonPointForm
+    login_url = 'login'
+    redirect_field_name = 'redirect_to'
+    success_url = '/add/'
+    success_message = "Added successfully!"
 
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(SeasonPointView, self).get_context_data(**kwargs)
+    #     if self.request.POST:
+    #         form = GameForm(request.POST or None)
+    #     else:
+    #         form = GameForm()
+    #     return context
+
+    # def form_valid(self, form):
+    #     form.send_email()
+    #     return super().form_valid(form)
 

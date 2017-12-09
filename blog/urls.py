@@ -21,7 +21,7 @@ from .views import  (
 		PostCreateView, 
 		PostDeleteView, 
 		PostUpdateView,
-		
+		SeasonPointView,
 		)
 
 
@@ -48,6 +48,6 @@ urlpatterns = [
 	url(r'^add_results/$', views.add_results, name='add_results'),
 	url(r'^result/(?P<pk>[0-9]+)/$', views.edit_results, name='edit_results'),
 	url(r'^delete_result/(?P<pk>[0-9]+)/$', views.delete_results, name='delete_results'),
-
+	url(r'^add/$', SeasonPointView.as_view(), name='season_point'),
 ]
 
