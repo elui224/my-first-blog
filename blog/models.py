@@ -373,6 +373,7 @@ class Game(models.Model):
 			, sum(case when total_points = 0 then 1 else 0 end) AS number_losses
 			, sum(total_points) AS total_points
 			, sum(goals) AS goals
+			, sum(goals) - sum(goal_diff) AS GA
 			, sum(goal_diff) AS goal_diff
 			, count(total_points) AS number_games 
 
@@ -416,7 +417,7 @@ class Game(models.Model):
 		rows = []
 		for row in seasonal_data:
 			r = ({"season":"Season " + str(row.season_number), "manager": row.manager_name, "wins": row.number_wins, "ties": row.number_ties, "losses": row.number_losses
-				, "points": row.total_points, "goals": row.goals, "GD": row.goal_diff, "games": row.number_games})
+				, "points": row.total_points, "goals": row.goals, "GA": row.GA, "GD": row.goal_diff, "games": row.number_games})
 			rows.append(r)
 
 
