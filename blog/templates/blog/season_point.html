@@ -21,6 +21,44 @@
 	</form>
 </div>
 
+<br>
+
+<!-- <div>
+    <form name="searchform" method='GET' action=''>
+        <div class='input-group'>                   
+            <input class="form-control" type='text' name='search_query' placeholder='Search posts' value='{{ request.GET.search_query }}'/><span class="input-group-addon" onclick="searchform.submit()"><i class="fa fa-search fa-fw"></i></span>
+        </div>
+</div> -->
+
+<br>
+
+<div>
+
+	<table class='table table-hover'>
+		<thead>
+			<tr>
+				<th>Coin</th>
+				<th>Price</th>
+				<th>24 Hour %</th>
+			</tr>
+		</thead>
+
+				{% for obj in price_list %}
+		<tbody>
+			<tr>
+				<!-- <td> {{forloop.revcounter}} </td> -->
+				<td>{{ obj.name }} </td>
+				<td>{{obj.price_usd}}</td>
+				<td>{{obj.percent_change_24h}}</td>
+			</tr>
+		</tbody>
+				{% endfor %}
+	
+	</table>
+
+
+
+</div>
 
 <div id="container"></div>
 

@@ -268,6 +268,7 @@ class ChartTotPlayerData(APIView):
         data = playerdataset
         return Response(data)   
 
+from . import services
 class SeasonPointView(LoginRequiredMixin, SuccessMessageMixin, FormView):
     template_name = 'blog/season_point.html'
     form_class = SeasonPointForm
@@ -276,16 +277,18 @@ class SeasonPointView(LoginRequiredMixin, SuccessMessageMixin, FormView):
     success_url = '/add/'
     success_message = "Added successfully!"
 
+    def form_valid(self, form):
+        form.save()   
+        return super(SeasonPointView, self).form_valid(form) 
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(SeasonPointView, self).get_context_data(**kwargs)
-    #     if self.request.POST:
-    #         form = GameForm(request.POST or None)
-    #     else:
-    #         form = GameForm()
-    #     return context
-
-    # def form_valid(self, form):
-    #     form.send_email()
-    #     return super().form_valid(form)
+    def get(self,request):
+        price_list = services.get_price()
+        # query = self.request.GET.get("search_query") #implements search function on main page.
+        # if query:
+        #     price_list = price_list.filter(
+        #         Q(title__icontains=query)|
+        #         Q(bodytext__icontains=query)
+        #         ).distinct()
+        print ([ d["name"] for d in price_list ])
+        return render(request,'blog/season_point.html', {'price_list': price_list})
 
