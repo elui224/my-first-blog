@@ -139,6 +139,7 @@ class Player(models.Model):
 		FROM (
 			SELECT id, player_name 
 			FROM blog_player
+			WHERE player_team_rec_status = 'A'
 			) player
 		LEFT JOIN
 		(

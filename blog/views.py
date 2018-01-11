@@ -20,7 +20,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-#This is a registration page.
+#This is a registration page to sign up
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
