@@ -14,7 +14,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from markdown_deux import markdown
 from PIL import Image
 
-class PostQuerySet(models.query.QuerySet): #custom queryset to handle queries to return posts.
+class PostQuerySet(models.query.QuerySet): ##custom queryset to handle queries to return posts.
 	def not_draft(self):
 		return self.filter(draft=False)
 
