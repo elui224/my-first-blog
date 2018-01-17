@@ -54,6 +54,11 @@ class GameForm(forms.ModelForm):
 
 class GoalForm(forms.ModelForm):
 
+	def __init__(self, *args, **kwargs): #This allows the player_name field to only display instances of active players in the form.
+		super (GoalForm, self ).__init__(*args,**kwargs)
+		self.fields["player_name"].queryset = Player.objects.filter(player_team_rec_status__exact = 'A')
+
+
 	class Meta:
 		model = Goal
 		fields = ["player_name","num_goals"]
@@ -63,7 +68,12 @@ class GoalForm(forms.ModelForm):
 		}
 
 
+
 class AssistForm(forms.ModelForm):
+
+	def __init__(self, *args, **kwargs): #This allows the player_name field to only display instances of active players in the form.
+		super (AssistForm, self ).__init__(*args,**kwargs)
+		self.fields["player_name"].queryset = Player.objects.filter(player_team_rec_status__exact = 'A')
 
 	class Meta:
 		model = Assist
