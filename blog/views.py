@@ -34,6 +34,9 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+#This class view renders the statistics page.
+class HomeView(TemplateView):
+    template_name = "blog/home.html"
 
 #This view returns all the posts in descending order.
 class PostListView(ListView):

@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 
 from . import views
 from .views import  (
+		HomeView,
 		AboutView, 
 		ChartData, 
 		ChartSeasonData,
@@ -26,8 +27,8 @@ from .views import  (
 
 
 urlpatterns = [
-
-    url(r'^$', PostListView.as_view(), name='post_list'),
+    url(r'^$', HomeView.as_view(), name='home'),   
+    url(r'^post/$', PostListView.as_view(), name='post_list'),
     url(r'^post/new/$', PostCreateView.as_view(), name='post_new'),
     url(r'^post/(?P<slug>[\w-]+)/$', PostDetailView.as_view(), name='post_detail'),
     url(r'^post/(?P<slug>[\w-]+)/edit/$', PostUpdateView.as_view(), name='post_edit'),

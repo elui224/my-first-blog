@@ -1,0 +1,30 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+
+      
+      <div class="jumbotron">
+        <h1 class="display-3">Hello!</h1>
+        <p class="lead">Welcome to the FIFA Lounge where we play a video game, track data, and visualized it.</p>
+        <div align:"center">
+          <span style="display:inline;">
+            <a href="{% url 'add_results'%}" class="btn btn-lg btn-block btn-success" role="button">Add Data</a>
+            <a href="{% url 'statistics'%}" class="btn btn-lg btn-block btn-success" role="button">View Data</a>
+            <a href="{% url 'post_list'%}" class="btn btn-lg btn-block btn-success" role="button">Blog</a>
+          </span>
+        </div>    
+      </div>
+
+
+      <footer class="footer">
+        <div class="">
+          <p class="muted"><a>Created by Eric Lui</a></p>   
+          <p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>      
+        </div>
+      </footer>
+
+    </div> <!-- /container -->
+
+
+</html>
+{% endblock %}

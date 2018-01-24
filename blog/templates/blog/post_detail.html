@@ -5,15 +5,15 @@
 {% block content %}
 
         {% if user.is_staff or user.is_superuser %}
-            <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"></a>
         {% endif %}
 
-        <h2><a href="/">{{ post.title }} {% if post.draft %} <span style='color:red;'>- Draft</span>{% endif %}</a></h2>
+        <h2><a href="{% url 'post_list' %}">{{ post.title }} {% if post.draft %}<span style='color:red;'>- Draft</span>{% endif %} </a></h2>{% if user.is_staff or user.is_superuser %}<a class="btn btn-default" href="{% url 'post_edit' slug=post.slug %}"> <i class="fa fa-pencil" aria-hidden="true"></i></a>{% endif %}
 
         <div>
 
         {%if post.image %}
-            <img href="{% url 'post_detail' slug=post.slug %}" src='{{post.image.url}}' width="{{ post.image.width }}" height="{{ post.image.height }}" class='img-responsive' />
+            <img href="{% url 'post_detail' slug=post.slug %}" src='{{post.image.url}}' width="{{ post.image.width }}" height="{{ post.image.height }}" class='img-responsive img-posts' />
         {% endif %}
 
         <div>
@@ -27,20 +27,5 @@
         </div>
 
         <div class="img">{{ post.get_html }}</div>
-
-        {% include 'blog/js.html' %}
-       
-        <script type="text/javascript">
-
-        {% block jquery %}
-
-            $(document).ready(function(){
-                $(".content-markdown img").each(function(){
-                    $(this).addClass("img-responsive")
-                })
-            })
-
-        {% endblock %}
-        </script>
 
 {% endblock %}

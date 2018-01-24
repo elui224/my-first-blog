@@ -2,82 +2,75 @@
 {% load auth_extras %}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-	<head>
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">		
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
-		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css"> 
-		
-		<link rel="stylesheet" type="text/css" href="{% static 'css/blog.css' %}">
+    <title>{% block head_title %}My Website{% endblock head_title %}</title>
 
-		<title>{% block head_title %}My Website{% endblock head_title %}</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.css"> 
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"> 
 
-	</head>
 
-	<body>
-		<div class = "page-header">
 
-				{% if user.is_staff or user.is_superuser %}
-				    <a href="{% url 'post_new' %}" class="top-menu"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
-				{% endif %}
-
-			<h1><a href="{% url 'post_list'%}">hello world</a></h1>	
-			<p> welcome to the FIFA lounge<i class="fa fa-glass fa-2x" aria-hidden="true"></i></p>
-
-		</div>
     
 
-		<div class="content container-fluid">
-		    <div class="row">
+    <!-- Custom styles for this template -->
+  <link href="../../static/css/home.css" rel="stylesheet">
+  </head>
 
-		    	<div class="col-xs-6 col-sm-3">	 
-					<div class="sidebar-nav">
-			            <div class="well" style="width:100%; padding: 12px;">
-			                <h4>Menu</h4>
-			        		<ul class="nav nav-list">         
-			        		  <li><a href="{% url 'about' %}">About</a></li>
-			        		  <li><a href="{% url 'statistics'%}">Statistics</a></li>
-			                  <li><a href="{% url 'add_results'%}">Add Results</a></li>
-			        		  <li><a href="{% url 'login'%}">Login</a></li>
-			        		  <li><a href="{% url 'logout'%}">Logout</a></li>
-			        		</ul>
-			        	</div>
-			            <br>
-			            <div class="well" style="width:100%; padding: 12px;">
-			                <h4>About Me</h4>
-			                <div style="margin-left: 10px;">
-			                    <p>Data Analyst in Washington D.C.</p>
-			                    <p>Hobbyist coder.</p>
-			                    <p>Amateur basketball player.</p>
-			                </div>
-			                <div>
-			                    <p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>
-			                </div>			                
-			            </div>
-			        </div>
-				</div>
+  <body>
+    <div class="container">
+      <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills float-right" id="pills-tab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link " href="{% url 'about' %}"><i class="fa fa-info" aria-hidden="true"></i> About<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'add_results'%}"><i class="fa fa-plus" aria-hidden="true"></i> Add Results</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="{% url 'statistics'%}"><i class="fa fa-table" aria-hidden="true"></i> Statistics</a>
+	            <div class="dropdown-menu">
+	              <a class="dropdown-item" href="{% url 'statistics'%}">Overall Statistics</a>
+	              <a class="dropdown-item" href="{% url 'statistics_season'%}">Seasons</a>
+	              <a class="dropdown-item" href="{% url 'statistics_h2h'%}">Head-to-Head</a>
+	              <a class="dropdown-item" href="{% url 'statistics_player'%}">Players</a>
+	            </div>
+            </li> 
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'post_list'%}"><i class="fa fa-newspaper-o" aria-hidden="true"></i> Blog</a>
+            </li> 
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login'%}"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</a>
+            </li>            
+          </ul>
+        </nav>
+        <h3>
+		  <a class="main" href="/" style="color:#5F9EA0">FIFA Lounge
+		  </a>
+		</h3>
+      </div>
 
-		        <div class="col-xs-6 col-sm-8">
-		        	{% include 'blog/messages_error_template.html' %}
-		            {% block content %}{% endblock %}	            
-		        </div>
+      <br>
+      <hr style="height:10px;">
 
-		    </div>
+	        <div class="content-body">
+	        	{% include 'blog/messages_error_template.html' %}
+	            {% block content %}{% endblock %}	            
+	        </div>
+
 		</div>
+	</div>
 
-	<footer class="footer">
-		<div class="">
-			<p class="muted"><a href="#">All the way up</a></p>
-			<p class="muted"><a>Created by Eric Lui</a></p>		
-			<p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>
-			
-
-		</div>
-	</footer>
-
-		{% include 'blog/js.html' %}
+	{% include 'blog/js.html' %}
 
 
 	<script>
@@ -85,8 +78,29 @@
 			{% block jquery %}{% endblock %}
 		})
 	</script>
+	<script>
+	    $(function(){
+	        $('a').each(function(){
+	            if ($(this).prop('href') == window.location.href) {
+	                $(this).addClass('active'); $(this).parents('li').addClass('active');
+	            }
+	        });
+	    });
+	</script>	
+</body>
 
 
-	</body>
+	
+
+  <footer class="footer">
+    <div class="">
+      <p class="muted"><a>Created by Eric Lui</a></p>   
+      <p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>      
+    </div>
+  </footer>
+
+
+
+
 </html>
 

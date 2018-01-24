@@ -1,0 +1,95 @@
+{% load staticfiles %}
+{% load auth_extras %}
+
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+
+		
+		
+		<link rel="stylesheet" type="text/css" href="{% static 'css/blog.css' %}">
+
+		<title>{% block head_title %}My Website{% endblock head_title %}</title>
+
+	</head>
+
+	<body>
+		<div class = "page-header">
+
+				{% if user.is_staff or user.is_superuser %}
+				    <a href="{% url 'post_new' %}" class="top-menu"><i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+				{% endif %}
+
+			<h1><a href="{% url 'post_list'%}">hello world</a></h1>	
+			<p> welcome to the FIFA lounge<i class="fa fa-glass fa-2x" aria-hidden="true"></i></p>
+
+		</div>
+    
+
+		<div class="content container-fluid">
+		    <div class="row">
+
+		    	<div class="col-xs-6 col-sm-3">	 
+					<div class="sidebar-nav">
+			            <div class="well" style="width:100%; padding: 12px;">
+			                <h4>Menu</h4>
+			        		<ul class="nav nav-list">         
+			        		  <li><a href="{% url 'about' %}">About</a></li>
+			        		  <li><a href="{% url 'statistics'%}">Statistics</a></li>
+			                  <li><a href="{% url 'add_results'%}">Add Results</a></li>
+			        		  <li><a href="{% url 'login'%}">Login</a></li>
+			        		  <li><a href="{% url 'logout'%}">Logout</a></li>
+			        		</ul>
+			        	</div>
+			            <br>
+			            <div class="well" style="width:100%; padding: 12px;">
+			                <h4>About Me</h4>
+			                <div style="margin-left: 10px;">
+			                    <p>Data Analyst in Washington D.C.</p>
+			                    <p>Hobbyist coder.</p>
+			                    <p>Amateur basketball player.</p>
+			                </div>
+			                <div>
+			                    <p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>
+			                </div>			                
+			            </div>
+			        </div>
+				</div>
+
+		        <div class="col-xs-6 col-sm-8">
+		        	{% include 'blog/messages_error_template.html' %}
+		            {% block content %}{% endblock %}	            
+		        </div>
+
+		    </div>
+		</div>
+
+	<footer class="footer">
+		<div class="">
+			<p class="muted"><a href="#">All the way up</a></p>
+			<p class="muted"><a>Created by Eric Lui</a></p>		
+			<p class="muted"><a href="mailto:elui224@gmail.com"><i class="fa fa-envelope fa-3x" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/in/elui224/"><i class="fa fa-linkedin-square fa-3x" aria-hidden="true"></i></a> <a href="https://github.com/elui224/"><i class="fa fa-github-square fa-3x" aria-hidden="true"></i></a> <a href="https://www.facebook.com/eric.lui.37"><i class="fa fa-facebook-square fa-3x" aria-hidden="true"></i></a></p>
+			
+
+		</div>
+	</footer>
+
+		{% include 'blog/js.html' %}
+
+
+	<script>
+		$(document).ready(function(){
+			{% block jquery %}{% endblock %}
+		})
+	</script>
+
+
+	</body>
+</html>
+
