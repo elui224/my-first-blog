@@ -155,7 +155,28 @@
 				{% endfor %}
 			</table>
 		</div>
-	{% endif %}
+		{% if game.has_other_pages %}
+		  <ul class="pagination pagination-lg">
+		    {% if game.has_previous %}
+		      <li class="page-item"><a class="page-link" href="?page={{ game.previous_page_number }}">Previous</a></li>
+		    {% else %}
+		      <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>
+		    {% endif %}
+		    {% for i in game.paginator.page_range %}
+		      {% if game.number == i %}
+		        <li class="page-item" class="active"><a class="page-link">{{ i }} <span class="sr-only">(current)</a></span></li>
+		      {% else %}
+		        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+		      {% endif %}
+		    {% endfor %}
+		    {% if game.has_next %}
+		      <li class="page-item"><a class="page-link" href="?page={{ game.next_page_number }}">Next</a></li>
+		    {% else %}
+		      <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Next</a></li>
+		    {% endif %}
+		  </ul>
+		  {% endif %}
+		{% endif %}
 </div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>

@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.forms import inlineformset_factory
 from django.http import JsonResponse
@@ -117,7 +117,15 @@ class AboutView(DetailView):
 #This function returns the Add Results page view.
 def add_results(request):
     num_games_display = 30
-    game = Game.objects.all().order_by('-timestamp')[:num_games_display]
+    game_list = Game.objects.all().order_by('-timestamp')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(game_list, num_games_display)
+    try:
+        game = paginator.page(page)
+    except PageNotAnInteger:
+        game = paginator.page(1)
+    except EmptyPage:
+        game = paginator.page(paginator.num_pages)
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     formset = GoalFormSet()
     AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
@@ -149,6 +157,7 @@ def add_results(request):
         'num_games_display': num_games_display,
         'form': form,
         'game': game,
+        # 'paginator': paginator,
         'formset': formset,
         'formset_assists': formset_assists,
     }
