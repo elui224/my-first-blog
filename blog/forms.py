@@ -18,12 +18,13 @@ class GameForm(forms.ModelForm):
 
 	class Meta:
 		model = Game
-		fields = ["your_first_name","opponent_first_name","your_score","opponent_score"]
+		fields = ["your_first_name","opponent_first_name","your_score","opponent_score","season_number"]
 		labels = {
 			'your_first_name': 'Your Name',
 			'opponent_first_name': 'Your Opponent',
 			'your_score': 'Your Score',
 			'opponent_score': 'Opponent Score',
+			'season_number': 'Season'
 		}
 		widgets = {
 			#This widget allows the foreign key field to display as a radio question.
