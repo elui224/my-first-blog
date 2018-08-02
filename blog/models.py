@@ -447,6 +447,7 @@ class Game(models.Model):
 			from blog_game
 			inner join blog_team t on blog_game.your_first_name_id = t.id
 			inner join blog_team te on blog_game.opponent_first_name_id = te.id
+			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
 
 			union all 
 
@@ -460,6 +461,7 @@ class Game(models.Model):
 			from blog_game
 			inner join blog_team t on blog_game.opponent_first_name_id = t.id
 			inner join blog_team te on blog_game.your_first_name_id = te.id
+			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
 
 			) stats
 		group by stats.player, stats.opponent

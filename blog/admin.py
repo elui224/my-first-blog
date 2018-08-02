@@ -42,7 +42,7 @@ class SeasonModelAdmin(admin.ModelAdmin):
 class GameModelAdmin(admin.ModelAdmin):
 	list_display = ["your_first_name","opponent_first_name","your_score","opponent_score",
 		"season_number","timestamp","author_game"]
-	list_filter = ["timestamp"]
+	list_filter = ["timestamp", "your_first_name", "opponent_first_name",]
 	search_fields = ["season_number__season_number",]
 
 	class Meta:

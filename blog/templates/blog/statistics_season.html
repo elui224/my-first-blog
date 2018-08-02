@@ -3,6 +3,7 @@
 
 {% block statscontent %}
 
+
 <div class="tab-content">
 
 	<h2><a id="">Seasons</a></h2>
@@ -39,6 +40,9 @@ var endpoint = '/api/chart/seasondata/';
 $('#data-table').DataTable({
 	paging: true,
 	lengthMenu: [[6, 12, 18, 24, -1], [6, 12, 18, 24, "All"]],
+	columnDefs: [
+		{ type: 'natural', targets: 0 }
+	],
 	order: [[ 0, "desc" ]],
     ajax: {
         url: endpoint,

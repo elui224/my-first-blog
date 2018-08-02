@@ -11,6 +11,14 @@
 
     <br>
 
+    <div>
+        {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'post_new'%}">ADD NEW POST</a>
+        {% endif %}
+    </div>
+
+    <br>
+
     {% for post in posts %}
 
         <div class="">

@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView, FormView
 from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet, SeasonPointForm
 from .models import Post, Game, Team, Goal, Player, Assist, SeasonPoint
+
 
 
 from rest_framework.views import APIView
@@ -68,11 +69,20 @@ class PostDetailView(DetailView):
 
 
 #class based view that allows one to create new blog posts.
-class PostCreateView(LoginRequiredMixin, CreateView):
+class PostCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = PostForm
     template_name = 'blog/post_edit.html'
     login_url = 'login'
     redirect_field_name = 'redirect_to'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_login_url(self):
+        if not self.request.user.is_authenticated():
+            return super(UserSettingsView, self).get_login_url()
+        else:
+            return '/'
 
     def form_valid(self, form):
         instance = form.save(commit=False)
@@ -117,7 +127,8 @@ class AboutView(DetailView):
 #This function returns the Add Results page view.
 def add_results(request):
     num_games_display = 30
-    game_list = Game.objects.all().order_by('-timestamp')
+    #game_list = Game.objects.all().order_by('-timestamp')
+    game_list = Game.objects.all().order_by('-season_number', '-timestamp')
     page = request.GET.get('page', 1)
     paginator = Paginator(game_list, num_games_display)
     try:
