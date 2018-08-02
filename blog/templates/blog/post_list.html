@@ -31,7 +31,7 @@
             </div>
             {% endif %}
             <div style="" class="caption">               
-                <p>Posted by <a href="/">{{post.author.first_name}}</a></p>
+                <p>Posted by <a href="/">{{post.author.first_name}} {{post.author.last_name}}</a></p>
                 <div class="date">
                     <p>published: {{ post.publish_date | timesince }} ago</p>
                 </div>
