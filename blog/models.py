@@ -113,63 +113,6 @@ class Team(models.Model):
 
 
 
-class Player(models.Model):
-	team 					= models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
-	player_name 			= models.CharField(max_length = 100)
-	player_position 		= models.CharField(max_length = 4, null = True, blank = True)
-	ACTIVE 					= 'A'
-	INACTIVE 				= 'I'
-	STATUS_CHOICES 			= (
-								(ACTIVE, 'Active'),
-								(INACTIVE, 'Inactive')
-							)
-	player_team_rec_status 	= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
-
-
-	def __str__(self):
-		return str(self.player_name)
-
-	class Meta:
-		ordering = ('player_name',)
-
-	def get_tot_player_data():
-
-		query_player_tot = '''
-		SELECT id, player_name, tot_goal, tot_assist 
-		FROM (
-			SELECT id, player_name 
-			FROM blog_player
-			WHERE player_team_rec_status = 'A'
-			) player
-		LEFT JOIN
-		(
-			SELECT player_name_id, sum(num_goals) tot_goal 
-			FROM blog_goal
-			group by player_name_id
-		) goal
-		ON player.id = goal.player_name_id
-		LEFT JOIN
-		(
-			SELECT player_name_id, sum(num_assists) tot_assist 
-			FROM blog_assist
-			group by player_name_id
-		) assist
-		ON player.id = assist.player_name_id
-		order by tot_goal desc
-		'''
-	
-		tot_player_data_query = Player.objects.raw(query_player_tot)
-
-		tot_player_data = []
-
-		for row in tot_player_data_query:
-			r = ({"id": row.id, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
-			tot_player_data.append(r)
-
-		return tot_player_data
-
-
-
 class Year(models.Model):
 	fifa_year = models.PositiveIntegerField(default=1)
 
@@ -180,13 +123,13 @@ def get_current_year_number():
 	year_qs = Year.objects.all()
 	year_exists = year_qs.exists()
 	if year_exists:
-		# prev_year_object = Year.objects.all().order_by('-fifa_year')[1]
-		current_year_object = Year.objects.latest('fifa_year')
+		# current_year_object = Year.objects.latest('fifa_year')
 		# current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
 		# next_fifa_year = current_fifa_year + 1
 		# Year.objects.create(fifa_year=next_fifa_year)
-		default_year_object = current_year_object
-	return default_year_object
+		current_year_object = Year.objects.latest('id') 
+		default_year_number = current_year_object.id
+	return default_year_number
 
 
 
@@ -257,8 +200,69 @@ def get_default_season_number():
 	return default_season_number
 
 
+
+class Player(models.Model):
+	#Add fifa year to the player model 9.15.2018
+	fifa_year 				= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
+	team 					= models.ForeignKey(Team, on_delete = models.CASCADE) #Each player can belong to multiple teams as they get traded.
+	player_name 			= models.CharField(max_length = 100)
+	player_position 		= models.CharField(max_length = 4, null = True, blank = True)
+	ACTIVE 					= 'A'
+	INACTIVE 				= 'I'
+	STATUS_CHOICES 			= (
+								(ACTIVE, 'Active'),
+								(INACTIVE, 'Inactive')
+							)
+	player_team_rec_status 	= models.CharField(max_length = 1, default = ACTIVE, choices = STATUS_CHOICES)
+
+
+	def __str__(self):
+		return str(self.player_name)
+
+	class Meta:
+		ordering = ('player_name',)
+
+	def get_tot_player_data():
+
+		query_player_tot = '''
+		SELECT id, player_name, tot_goal, tot_assist 
+		FROM (
+			SELECT id, player_name 
+			FROM blog_player
+			WHERE player_team_rec_status = 'A'
+			) player
+		LEFT JOIN
+		(
+			SELECT player_name_id, sum(num_goals) tot_goal 
+			FROM blog_goal
+			group by player_name_id
+		) goal
+		ON player.id = goal.player_name_id
+		LEFT JOIN
+		(
+			SELECT player_name_id, sum(num_assists) tot_assist 
+			FROM blog_assist
+			group by player_name_id
+		) assist
+		ON player.id = assist.player_name_id
+		order by tot_goal desc
+		'''
+	
+		tot_player_data_query = Player.objects.raw(query_player_tot)
+
+		tot_player_data = []
+
+		for row in tot_player_data_query:
+			r = ({"id": row.id, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
+			tot_player_data.append(r)
+
+		return tot_player_data
+
+
 class Game(models.Model):
 	author_game 			= models.ForeignKey('auth.User')
+	#Add fifa year to the player model 9.15.2018
+	fifa_year 				= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
 	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
 	your_first_name 		= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
 	opponent_first_name 	= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
@@ -622,8 +626,10 @@ class Assist(models.Model):
 
 
 class SeasonPoint(models.Model):
-	manager_name = models.ForeignKey(Team, on_delete = models.CASCADE)
+	manager_name 	= models.ForeignKey(Team, on_delete = models.CASCADE)
 	season_points 	= models.PositiveIntegerField()
+	#Add fifa year to the player model 9.15.2018
+	fifa_year 		= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
 	season_number 	= models.ForeignKey(Season,  default = get_default_season_number, on_delete = models.CASCADE) 
 
 

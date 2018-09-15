@@ -33,17 +33,17 @@ class YearModelAdmin(admin.ModelAdmin):
 		model = Year
 
 class SeasonModelAdmin(admin.ModelAdmin):
-	list_display = ["season_number",]
-	list_filter = ["season_number"]
+	list_display = ["season_number", "fifa_year",]
+	list_filter = ["season_number", "fifa_year",]
 
 	class Meta:
 		model = Season
 
 class GameModelAdmin(admin.ModelAdmin):
 	list_display = ["your_first_name","opponent_first_name","your_score","opponent_score",
-		"season_number","timestamp","author_game"]
+		"season_number","timestamp","author_game", "fifa_year",]
 	list_filter = ["timestamp", "your_first_name", "opponent_first_name",]
-	search_fields = ["season_number__season_number",]
+	search_fields = ["season_number__season_number", "fifa_year",]
 
 	class Meta:
 		model = Game
