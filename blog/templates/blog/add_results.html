@@ -130,6 +130,7 @@
 					<tr>
 						<th>Game</th>
 						<th>Score</th>
+						<th>Fifa Year</th>
 						<th>Season</th>	
 						<th>Edit Result</th>
 						{% if user.is_authenticated %}
@@ -145,6 +146,7 @@
 						<!-- <td> {{forloop.revcounter}} </td> -->
 						<td>{{instance.your_first_name}} vs {{instance.opponent_first_name}}</td>
 						<td>score: {{instance.your_score}} - {{instance.opponent_score}}</td>
+						<td>{{instance.fifa_year.id|add:"2017" }}</td>
 						<td>{{instance.season_number}}</td>
 						<td> <a href="{% url 'edit_results' instance.pk %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
 						{% if user.is_authenticated %}

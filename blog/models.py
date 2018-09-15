@@ -143,7 +143,7 @@ class Season(models.Model):
 
 
 
-def get_default_season_number(): 
+def get_default_season_number(): #Need to think of way to reset counter of seasons after new fifa year.
 #Returns the current season based on number of games played to display.
 	active_teams_count = Team.get_active_teams_count()
 	# active_teams_count = 4

@@ -128,7 +128,7 @@ class AboutView(DetailView):
 def add_results(request):
     num_games_display = 30
     #game_list = Game.objects.all().order_by('-timestamp')
-    game_list = Game.objects.all().order_by('-season_number', '-timestamp')
+    game_list = Game.objects.all().order_by('-fifa_year', '-season_number', '-timestamp')
     page = request.GET.get('page', 1)
     paginator = Paginator(game_list, num_games_display)
     try:
