@@ -497,6 +497,7 @@ def get_default_game_number():
 
 class Goal(models.Model):
 	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
+	fifa_year 	= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
 	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
 	num_goals 	= models.PositiveIntegerField(null = True)
 
@@ -618,8 +619,9 @@ class Goal(models.Model):
 
 class Assist(models.Model):
 	player_name = models.ForeignKey(Player, on_delete = models.CASCADE)
+	fifa_year 	= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
 	game 		= models.ForeignKey(Game, default = get_default_game_number, on_delete = models.CASCADE)
-	num_assists 	= models.PositiveIntegerField(null = True)
+	num_assists = models.PositiveIntegerField(null = True)
 
 	def __str__(self):
 		return '{} {}'.format("Assist",self.game) 

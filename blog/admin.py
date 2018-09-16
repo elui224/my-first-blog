@@ -18,7 +18,7 @@ class TeamModelAdmin(admin.ModelAdmin):
 		model = Team
 
 class PlayerModelAdmin(admin.ModelAdmin):
-	list_display = ["player_name", "team"]
+	list_display = ["player_name", "team", "fifa_year"]
 	list_filter = ["team"]
 	search_fields = ["player_name","team__manager_name"]
 
