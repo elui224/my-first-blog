@@ -225,10 +225,11 @@ class Player(models.Model):
 	def get_tot_player_data():
 
 		query_player_tot = '''
-		SELECT id, player_name, tot_goal, tot_assist 
+		SELECT player.id, fifa_year, player_name, tot_goal, tot_assist 
 		FROM (
-			SELECT id, player_name 
+			SELECT blog_player.id, blog_player.player_name, blog_player.fifa_year_id, blog_year.fifa_year
 			FROM blog_player
+			INNER JOIN blog_year ON blog_player.fifa_year_id = blog_year.id
 			WHERE player_team_rec_status = 'A'
 			) player
 		LEFT JOIN
@@ -245,15 +246,15 @@ class Player(models.Model):
 			group by player_name_id
 		) assist
 		ON player.id = assist.player_name_id
-		order by tot_goal desc
+		order by fifa_year desc, tot_goal desc, player_name
 		'''
 	
-		tot_player_data_query = Player.objects.raw(query_player_tot)
+		tot_player_data_query = Year.objects.raw(query_player_tot)
 
 		tot_player_data = []
 
 		for row in tot_player_data_query:
-			r = ({"id": row.id, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
+			r = ({"id": row.id, "fifa_year": row.fifa_year, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
 			tot_player_data.append(r)
 
 		return tot_player_data
@@ -313,6 +314,7 @@ class Game(models.Model):
 			SELECT id, 
 				manager_name
 				, rec_status
+				, fifa_year
 				, sum(total_points) AS total_points
 				, sum(goals) AS goals
 				, sum(goal_diff) AS goal_diff
@@ -325,6 +327,7 @@ class Game(models.Model):
 					blog_team.id
 					, blog_team.manager_name
 					, blog_team.rec_status
+					, blog_game.fifa_year_id fifa_year
 					, blog_game.your_result AS total_points 
 					, blog_game.your_score AS goals
 					, cast(blog_game.your_score as signed) - cast(blog_game.opponent_score as signed) AS goal_diff
@@ -336,13 +339,14 @@ class Game(models.Model):
 					blog_team.id
 					, blog_team.manager_name
 					, blog_team.rec_status
+					, blog_game.fifa_year_id fifa_year
 					, blog_game.opponent_result AS total_points 
 					, blog_game.opponent_score AS goals
 					, cast(blog_game.opponent_score as signed) - cast(blog_game.your_score as signed) AS goal_diff
 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
 			) AGGREGATED 
 			WHERE rec_status = 'A'
-			GROUP BY id, manager_name, rec_status
+			GROUP BY id, manager_name, rec_status, fifa_year
 			) data
 		LEFT OUTER JOIN
 		(
@@ -373,6 +377,7 @@ class Game(models.Model):
 			id
 			, manager_name
 			, season_number
+			, fifa_year
 			, sum(case when total_points = 3 then 1 else 0 end) AS number_wins
 			, sum(case when total_points = 1 then 1 else 0 end) AS number_ties
 			, sum(case when total_points = 0 then 1 else 0 end) AS number_losses
@@ -387,6 +392,7 @@ class Game(models.Model):
 			SELECT 
 				blog_team.id
 				, blog_season.season_number
+				, blog_year.fifa_year fifa_year
 				, blog_team.manager_name
 				, blog_team.rec_status
 				, blog_game.your_result AS total_points 
@@ -395,6 +401,7 @@ class Game(models.Model):
 			FROM blog_team 
 			LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id) 
 			LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+			LEFT OUTER JOIN blog_year ON (blog_season.fifa_year_id = blog_year.id)
 			WHERE blog_team.rec_status = 'A'
 			
 			UNION ALL 
@@ -402,6 +409,7 @@ class Game(models.Model):
 			SELECT 
 				blog_team.id
 				, blog_season.season_number
+				, blog_year.fifa_year fifa_year
 				, blog_team.manager_name
 				, blog_team.rec_status
 				, blog_game.opponent_result AS total_points 
@@ -410,10 +418,11 @@ class Game(models.Model):
 			FROM blog_team 
 			LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id) 
 			LEFT OUTER JOIN blog_season ON (blog_game.season_number_id = blog_season.id)
+			LEFT OUTER JOIN blog_year ON (blog_season.fifa_year_id = blog_year.id)
 			WHERE blog_team.rec_status = 'A'
 			) AGGREGATED 
 		WHERE season_number is not null
-		GROUP BY id, manager_name, rec_status, season_number
+		GROUP BY id, manager_name, rec_status, season_number, fifa_year
 		ORDER BY SEASON_NUMBER
 		'''
 
@@ -421,7 +430,7 @@ class Game(models.Model):
 
 		rows = []
 		for row in seasonal_data:
-			r = ({"season":"Season " + str(row.season_number), "manager": row.manager_name, "wins": row.number_wins, "ties": row.number_ties, "losses": row.number_losses
+			r = ({"fifa_year": str(row.fifa_year), "season":"Season " + str(row.season_number), "manager": row.manager_name, "wins": row.number_wins, "ties": row.number_ties, "losses": row.number_losses
 				, "points": row.total_points, "goals": row.goals, "GA": row.GA, "GD": row.goal_diff, "games": row.number_games})
 			rows.append(r)
 

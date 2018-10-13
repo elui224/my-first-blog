@@ -12,6 +12,7 @@
 	<table id="data-table" class="table table-bordered table-striped table-hover" cellspacing="0" width="100%">
 		<thead>
 			<tr>
+				<td>FIFA Year</td>
 				<td>Season</td>
 				<td>Games</td>
 				<td>Manager</td>
@@ -43,12 +44,13 @@ $('#data-table').DataTable({
 	columnDefs: [
 		{ type: 'natural', targets: 0 }
 	],
-	order: [[ 0, "desc" ]],
+	order: [[ 0, "desc" ], [ 1, "desc" ]],
     ajax: {
         url: endpoint,
         dataSrc: '' 
     },
     columns: [
+    		{ "data": "fifa_year"},
 			{ "data": "season"},
 			{ "data": "games"},
 			{ "data": "manager"},

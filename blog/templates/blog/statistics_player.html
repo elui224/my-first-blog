@@ -11,6 +11,7 @@
 		<thead>
 			<tr>
 				<!-- <td>Manager</td> -->
+				<td>FIFA Year</td>
 				<td>Player</td>
 				<td>Total Goals</td>
 				<td>Total Assists</td>
@@ -37,6 +38,7 @@ $('#data-tables').DataTable({
         dataSrc: '' 
     },
     columns: [
+    		{ "data": "fifa_year"},
 			{ "data": "player"},
 			{ "data": "goals"},
 			{ "data": "assists"}
