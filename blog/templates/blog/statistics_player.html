@@ -31,7 +31,7 @@
 var endpoint = '/api/chart/playertotaldata/';
 $('#data-tables').DataTable({
 	paging: true,
-	order: [[1, "desc"]],
+	order: [[0, "desc"], [2, "desc"]],
 	lengthMenu: [[20, 30, -1], [20, 30, "All"]],
     ajax: {
         url: endpoint,
