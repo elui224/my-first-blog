@@ -44,19 +44,22 @@ function renderChart() {
 	            data: defaultData_wins,
 	            backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: setBorderWidth
+                borderWidth: setBorderWidth,
+                hidden: true,
 	            }, {
 	            label: 'Ties',
 	            data: defaultData_ties,
 	            backgroundColor: 'rgba(255, 206, 86, 0.2)',
                 borderColor: 'rgba(255, 206, 86, 1)',
-                borderWidth: setBorderWidth
+                borderWidth: setBorderWidth,
+                hidden: true,
 	            }, {
 	            label: 'Losses',
 	            data: defaultData_losses,
 	            backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: setBorderWidth
+                borderWidth: setBorderWidth,
+                hidden: true,
 
 	           }]
 	        },
