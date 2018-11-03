@@ -351,7 +351,12 @@ class Game(models.Model):
 			) data
 		LEFT OUTER JOIN
 		(
-		select manager_name_id, sum(season_points) ovr_season_pts from blog_seasonpoint GROUP BY manager_name_id
+		select 
+			manager_name_id, 
+			sum(season_points) ovr_season_pts 
+		from blog_seasonpoint 
+		where blog_seasonpoint.fifa_year_id = (select max(id) from blog_year)
+		GROUP BY manager_name_id
 		) seasonpoint ON data.id = seasonpoint.manager_name_id
 		'''
 
