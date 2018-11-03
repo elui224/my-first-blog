@@ -346,6 +346,7 @@ class Game(models.Model):
 				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
 			) AGGREGATED 
 			WHERE rec_status = 'A'
+			and fifa_year = (select max(id) from blog_year)
 			GROUP BY id, manager_name, rec_status, fifa_year
 			) data
 		LEFT OUTER JOIN
