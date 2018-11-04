@@ -123,10 +123,6 @@ def get_current_year_number():
 	year_qs = Year.objects.all()
 	year_exists = year_qs.exists()
 	if year_exists:
-		# current_year_object = Year.objects.latest('fifa_year')
-		# current_fifa_year = Year.objects.all().aggregate(Max('fifa_year'))['fifa_year__max']
-		# next_fifa_year = current_fifa_year + 1
-		# Year.objects.create(fifa_year=next_fifa_year)
 		current_year_object = Year.objects.latest('id') 
 		default_year_number = current_year_object.id
 	return default_year_number
@@ -150,12 +146,17 @@ def get_default_season_number(): #Need to think of way to reset counter of seaso
 	season_games_against_opponent = 2
 	opponents_per_season = active_teams_count - 1
 
-	prev_season_object = Season.objects.all().order_by('-season_number')[1]
-	current_season_object = Season.objects.latest('season_number')
+	current_fifa_year_id = Year.objects.latest('id') #added year filter to grab the latest fifa year for counts
+	
+	try:
+		prev_season_object = Season.objects.filter(fifa_year_id = current_fifa_year_id).all().order_by('-season_number')[1]
+	except:
+		prev_season_object = None
+	current_season_object = Season.objects.filter(fifa_year_id = current_fifa_year_id).latest('season_number')
 
-	current_season_number = Season.objects.all().aggregate(Max('season_number'))['season_number__max']
-	prev_season_game_count = Game.objects.filter(season_number__season_number = current_season_number - 1).count()
-	current_season_game_count = Game.objects.filter(season_number__season_number = current_season_number ).count()
+	current_season_number = Season.objects.filter(fifa_year_id = current_fifa_year_id).aggregate(Max('season_number'))['season_number__max']	
+	prev_season_game_count = Game.objects.filter(fifa_year_id = current_fifa_year_id).filter(season_number__season_number = current_season_number - 1).count()
+	current_season_game_count = Game.objects.filter(fifa_year_id = current_fifa_year_id).filter(season_number__season_number = current_season_number ).count()
 
 	'''
 	Determines the number of games in the season.
@@ -184,8 +185,7 @@ def get_default_season_number(): #Need to think of way to reset counter of seaso
 			default_season_number = current_season_object
 
 		else:
-			#create new instance of Season. Increment default_season_number by 1.
-			current_fifa_year_id = Year.objects.latest('id') 
+			#create new instance of Season. Increment default_season_number by 1. 
 			next_season = current_season_number + 1
 			if next_season % 4 == 0: #This determines if the new object will be a special season or not. Special seasons happen every four years.
 				special_season = 1
