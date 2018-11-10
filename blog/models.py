@@ -467,6 +467,8 @@ class Game(models.Model):
 			inner join blog_team t on blog_game.your_first_name_id = t.id
 			inner join blog_team te on blog_game.opponent_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
+			and blog_game.fifa_year_id = (select max(fifa_year_id) from blog_game)
+
 
 			union all 
 
@@ -481,7 +483,7 @@ class Game(models.Model):
 			inner join blog_team t on blog_game.opponent_first_name_id = t.id
 			inner join blog_team te on blog_game.your_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
-
+			and blog_game.fifa_year_id = (select max(fifa_year_id) from blog_game)
 			) stats
 		group by stats.player, stats.opponent
 		'''
