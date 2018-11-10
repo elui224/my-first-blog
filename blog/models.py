@@ -467,7 +467,7 @@ class Game(models.Model):
 			inner join blog_team t on blog_game.your_first_name_id = t.id
 			inner join blog_team te on blog_game.opponent_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
-			and blog_game.fifa_year_id = (select max(fifa_year_id) from blog_game bg where bg.id = blog_game.id)
+			and blog_game.fifa_year_id = (select max(bg.fifa_year_id) from blog_game bg where bg.id = blog_game.id)
 
 
 			union all 
@@ -483,7 +483,7 @@ class Game(models.Model):
 			inner join blog_team t on blog_game.opponent_first_name_id = t.id
 			inner join blog_team te on blog_game.your_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
-			and blog_game.fifa_year_id = (select max(fifa_year_id) from blog_game bg where bg.id = blog_game.id)
+			and blog_game.fifa_year_id = (select max(bg.fifa_year_id) from blog_game bg where bg.id = blog_game.id)
 			) stats
 		group by stats.player, stats.opponent
 		'''
@@ -538,6 +538,7 @@ class Goal(models.Model):
 					INNER JOIN
 					blog_game ON blog_game.id = blog_goal.game_id
 					where player_team_rec_status = 'A'
+					and blog_player.fifa_year_id = (select max(bp.fifa_year_id) from blog_player bp)
 					) data1
 				INNER JOIN 
 				blog_team ON data1.opponent = blog_team.id
@@ -561,6 +562,7 @@ class Goal(models.Model):
 					INNER JOIN
 					blog_game ON blog_game.id = blog_assist.game_id
 					where player_team_rec_status = 'A'
+					and blog_player.fifa_year_id = (select max(bp.fifa_year_id) from blog_player bp)
 					) data1
 				INNER JOIN 
 				blog_team ON data1.opponent = blog_team.id
@@ -587,6 +589,7 @@ class Goal(models.Model):
 				INNER JOIN
 				blog_game ON blog_game.id = blog_assist.game_id
 				where player_team_rec_status = 'A'
+				and blog_player.fifa_year_id = (select max(bp.fifa_year_id) from blog_player bp)
 				) data1
 			INNER JOIN 
 			blog_team ON data1.opponent = blog_team.id
@@ -610,6 +613,7 @@ class Goal(models.Model):
 				INNER JOIN
 				blog_game ON blog_game.id = blog_goal.game_id
 				where player_team_rec_status = 'A'
+				and blog_player.fifa_year_id = (select max(bp.fifa_year_id) from blog_player bp)
 				) data1
 			INNER JOIN 
 			blog_team ON data1.opponent = blog_team.id
