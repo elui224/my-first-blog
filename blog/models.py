@@ -1,7 +1,7 @@
 
 from datetime import datetime
 # from datetime import date
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.db.models import Max, Sum, Count
 from django.db.models import signals
@@ -35,7 +35,7 @@ def img_upload_location(instance, filename):
 	return "%s/%s" %(instance.slug, filename)
 
 class Post(models.Model):
-	author 			= models.ForeignKey('auth.User')
+	author 			= models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
 	title 			= models.CharField(max_length = 100)
 	draft 			= models.BooleanField(default = False)
 	slug 			= models.SlugField(unique = True)
@@ -152,6 +152,7 @@ def get_default_season_number(): #Need to think of way to reset counter of seaso
 		prev_season_object = Season.objects.filter(fifa_year_id = current_fifa_year_id).all().order_by('-season_number')[1]
 	except:
 		prev_season_object = None
+		
 	current_season_object = Season.objects.filter(fifa_year_id = current_fifa_year_id).latest('season_number')
 
 	current_season_number = Season.objects.filter(fifa_year_id = current_fifa_year_id).aggregate(Max('season_number'))['season_number__max']	
@@ -261,7 +262,7 @@ class Player(models.Model):
 
 
 class Game(models.Model):
-	author_game 			= models.ForeignKey('auth.User')
+	author_game 			= models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
 	#Add fifa year to the player model 9.15.2018
 	fifa_year 				= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
 	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 

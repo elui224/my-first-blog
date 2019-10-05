@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.urls import reverse_lazy
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView, FormView
 from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet, SeasonPointForm
 from .models import Post, Game, Team, Goal, Player, Assist, SeasonPoint
@@ -79,7 +79,7 @@ class PostCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return self.request.user.is_staff
 
     def get_login_url(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return super(UserSettingsView, self).get_login_url()
         else:
             return '/'
