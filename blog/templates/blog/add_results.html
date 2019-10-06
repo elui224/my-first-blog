@@ -116,8 +116,11 @@
 	<input type="submit" class="btn btn-success" value="Add Result" disabled/>
 	{% endif%}
 	</form>
-	<hr>
-	<div>
+
+</div>
+
+<hr>
+<div>
 	{% if game %}
 		<h2><a id="anchor2">Game Log (Last {{ num_games_display }} Games)</a></h2>
 		<p>To edit a past result, click the pencil icon <i class="fa fa-pencil" aria-hidden="true"></i> beside the game. To delete a past result, click the trash icon <i class="fa fa-trash-o" aria-hidden="true"></i> beside the game. </p>
@@ -154,31 +157,39 @@
 				{% endfor %}
 			</table>
 		</div>
+
+
 		{% if game.has_other_pages %}
-		  <ul class="pagination pagination-lg">
-		    {% if game.has_previous %}
-		      <li class="page-item"><a class="page-link" href="?page={{ game.previous_page_number }}">Previous</a></li>
-		    {% else %}
-		      <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>
-		    {% endif %}
-		    {% for i in game.paginator.page_range %}
-		      {% if game.number == i %}
-		        <li class="page-item" class="active"><a class="page-link">{{ i }} <span class="sr-only">(current)</a></span></li>
-		      {% else %}
-		        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-		      {% endif %}
-		    {% endfor %}
-		    {% if game.has_next %}
-		      <li class="page-item"><a class="page-link" href="?page={{ game.next_page_number }}">Next</a></li>
-		    {% else %}
-		      <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Next</a></li>
-		    {% endif %}
-		  </ul>
-		  {% endif %}
+			<ul class="pagination">
+			{% if game.has_previous %}
+				<li class="page-item"><a class="page-link" href="?page={{ game.previous_page_number }}">Previous</a></li>
+			{% else %}
+				<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>
+			{% endif %}
+			{% for i in game.paginator.page_range %}
+				{% if game.number > 3 and forloop.first %}
+					<li class="page-item" class="active"><a class="page-link">{{ i }}</a></li>
+					<li class="disabled">...</li>
+				{% endif %}
+				{% if game.number == i %}
+					<li class="page-item" class="active"><a class="page-link">{{ i }}<span class="sr-only">(current)</a></span></li>
+				{% elif i > game.number|add:'-3' and i < game.number|add:'3' %}
+					<li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+				{% endif %}
+				{% if game.paginator.num_pages > game.number|add:'3' and forloop.last %}
+					<li class="disabled">...</li>
+					<li class="page-item"><a class="page-link" href="?page={{ game.paginator.num_pages }}">{{ game.paginator.num_pages}}</a></li>
+				{% endif %}
+			{% endfor %}
+			{% if game.has_next %}
+				<li class="page-item"><a class="page-link" href="?page={{ game.next_page_number }}">Next</a></li>
+			{% else %}
+				<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Next</a></li>
+			{% endif %}
+			</ul>
 		{% endif %}
-
-</div>
-
+	{% endif %}
+		
 </div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>

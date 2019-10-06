@@ -126,7 +126,7 @@ class AboutView(DetailView):
 
 #This function returns the Add Results page view.
 def add_results(request):
-    num_games_display = 30
+    num_games_display = 15
     #game_list = Game.objects.all().order_by('-timestamp')
     game_list = Game.objects.all().order_by('-fifa_year', '-season_number', '-timestamp')
     page = request.GET.get('page', 1)
