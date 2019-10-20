@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView, CreateView, ListView, DeleteView, UpdateView, FormView
 from .forms import PostForm, GameForm, GoalForm, AssistForm, BaseGoalFormSet, BaseAssistFormSet, SeasonPointForm
-from .models import Post, Game, Team, Goal, Player, Assist, SeasonPoint
+from .models import Post, Game, Team, Goal, Player, Assist, SeasonPoint, Season, Year
 
 
 
@@ -127,8 +127,7 @@ class AboutView(DetailView):
 #This function returns the Add Results page view.
 def add_results(request):
     num_games_display = 15
-    #game_list = Game.objects.all().order_by('-timestamp')
-    game_list = Game.objects.all().order_by('-fifa_year', '-season_number', '-timestamp')
+    game_list = Game.objects.all().order_by('-fifa_year', '-timestamp')
     page = request.GET.get('page', 1)
     paginator = Paginator(game_list, num_games_display)
     try:
@@ -137,9 +136,16 @@ def add_results(request):
         game = paginator.page(1)
     except EmptyPage:
         game = paginator.page(paginator.num_pages)
+
+    #So we do not have NoneType attribute errors when there are fewer than 2 season objects for the most recent year.
+    #Creates two new season objects for the new year to the form of the web app started.
+    if not Season.objects.filter(fifa_year__fifa_year__exact = Year.objects.values_list('fifa_year', flat=True).last()).exists():
+        Season.objects.create(season_number=1, fifa_year=Year.objects.latest('id'), special_season_ind=0)
+        Season.objects.create(season_number=2, fifa_year=Year.objects.latest('id'), special_season_ind=0)
+
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
-    formset = GoalFormSet()
     AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
+    formset = GoalFormSet()
     formset_assists = AssistFormSet()
 
     if request.method == "POST":
@@ -160,7 +166,7 @@ def add_results(request):
                     messages.success(request, 'Results Added!')
                     return redirect('add_results')
             else:
-                messages.warning(request, 'There are errors.')
+                messages.warning(request, 'Submit Failed. Fix Errors.')
     else:
         form = GameForm()
         
@@ -168,7 +174,7 @@ def add_results(request):
         'num_games_display': num_games_display,
         'form': form,
         'game': game,
-        # 'paginator': paginator,
+        'paginator': paginator,
         'formset': formset,
         'formset_assists': formset_assists,
     }
@@ -179,10 +185,16 @@ def add_results(request):
 #This functions allows result views to be editable. Update.
 def edit_results(request, pk):
     game = get_object_or_404(Game, pk=pk)
+    #So we do not have NoneType attribute errors when there are fewer than 2 season objects for the most recent year.
+    #Creates two new season objects for the new year to the form of the web app started.
+    if not Season.objects.filter(fifa_year__fifa_year__exact = Year.objects.values_list('fifa_year', flat=True).last()).exists():
+        Season.objects.create(season_number=1, fifa_year=Year.objects.latest('id'), special_season_ind=0)
+        Season.objects.create(season_number=2, fifa_year=Year.objects.latest('id'), special_season_ind=0)
+
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
-    formset = GoalFormSet(instance=game)
     AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
-    formset_assists = AssistFormSet(instance=game)
+    formset = GoalFormSet()
+    formset_assists = AssistFormSet()
 
     if request.method == "POST":
         form = GameForm(request.POST or None, request.FILES, instance=game)
@@ -202,7 +214,7 @@ def edit_results(request, pk):
                     messages.success(request, 'Results Updated!')
                     return redirect('/add_results/')
             else:
-                messages.warning(request, 'There are errors.')
+                messages.warning(request, 'Update Failed. Fix Errors.')
 
     else:
         form = GameForm(instance=game)

@@ -5,7 +5,7 @@
 
 <div class="tab-content">
 
-	<h2><a>Head to Head Games (Only Regular Seasons)</a></h2>
+	<h2><a>Head to Head Games (Only Regular Games)</a></h2>
 
 	<table id="data-table" class="table table-bordered table-striped table-hover" cellspacing="0" width="100%">
 
@@ -19,6 +19,7 @@
 				<td>Points</td>
 				<td>GD</td>
 				<td>Games</td>
+				<td>Win Pct</td>
 			</tr>
 		</thead>
 
@@ -73,7 +74,8 @@ $('#data-table').DataTable({
 			{ "data": "losses"},
 			{ "data": "points"},
 			{ "data": "GD"},
-			{ "data": "games"}
+			{ "data": "games"},
+			{ "data": "win_pct"}
     ]
 });
 

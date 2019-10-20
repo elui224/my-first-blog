@@ -23,13 +23,13 @@ class GameForm(forms.ModelForm):
 
 	class Meta:
 		model = Game
-		fields = ["your_first_name","opponent_first_name","your_score","opponent_score","season_number"]
+		fields = ["your_first_name","opponent_first_name","your_score","opponent_score","tourney_game",]
 		labels = {
 			'your_first_name': 'Your Name',
 			'opponent_first_name': 'Your Opponent',
 			'your_score': 'Your Score',
 			'opponent_score': 'Opponent Score',
-			'season_number': 'Season'
+			'tourney_game': 'Tourney Game'
 		}
 		widgets = {
 			#This widget allows the foreign key field to display as a radio question.
@@ -41,8 +41,6 @@ class GameForm(forms.ModelForm):
 		super(GameForm, self).__init__(*args, **kwargs)
 		self.fields['your_first_name'].empty_label = None
 		self.fields['opponent_first_name'].empty_label = None
-		#The season dropdown only returns the seasons available for the latest year.
-		self.fields['season_number'].queryset = Season.objects.filter(fifa_year__fifa_year__exact = last_year) 
 
 	def clean(self, *args, **kwargs): 
 		#For radioselect, must check if fields exist before requirement validation kicks in. Will cause error if this is not here.

@@ -11,7 +11,8 @@ $.ajax({
 	success: function(data){
 		labels = data.manager_name
 		defaultData_points = data.total_points //This represents game points
-		defaultData_ovr_season_pts = data.ovr_season_pts
+		defaultData_number_games = data.number_games
+		defaultData_win_pct = data.win_pct
 		defaultData_wins = data.number_wins
 		defaultData_ties = data.number_ties
 		defaultData_losses = data.number_losses
@@ -30,15 +31,23 @@ function renderChart() {
 	var ctx = document.getElementById("myChart");
 	var setBorderWidth = 1;
 	var myChart = new Chart(ctx, {
-	    type: 'bar',
+	    type: 'horizontalBar',
 	    data: {
 	        labels: labels,
 	        datasets: [{
-	            label: 'Overall Season Points',
-	            data: defaultData_ovr_season_pts,
+	            label: 'Overall Win Pct',
+	            data: defaultData_win_pct,
 	            backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255,99,132,1)',
                 borderWidth: setBorderWidth
+	            }, 
+	            {
+	            label: 'Games Played',
+	            data: defaultData_number_games,
+	            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: setBorderWidth,
+                hidden: true,
 	            }, {
 	            label: 'Wins',
 	            data: defaultData_wins,

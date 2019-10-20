@@ -265,6 +265,7 @@ class Game(models.Model):
 	author_game 			= models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
 	#Add fifa year to the player model 9.15.2018
 	fifa_year 				= models.ForeignKey(Year, null=True, default = get_current_year_number, on_delete = models.CASCADE)
+	tourney_game 			= models.BooleanField(default = False)
 	season_number 			= models.ForeignKey(Season, null = True,  default = get_default_season_number, on_delete = models.CASCADE) 
 	your_first_name 		= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'your_first_name')
 	opponent_first_name 	= models.ForeignKey(Team, on_delete = models.CASCADE, related_name = 'opponent_first_name')
@@ -307,7 +308,8 @@ class Game(models.Model):
 		'number_losses':[],
 		'manager_name':[],
 		'ovr_season_pts':[],
-		'GA':[]
+		'GA':[],
+		'win_pct':[]
 		}
 
 		query = '''
@@ -323,6 +325,7 @@ class Game(models.Model):
 				, sum(case when total_points = 3 then 1 end) AS number_wins
 				, sum(case when total_points = 1 then 1 end) AS number_ties
 				, sum(case when total_points = 0 then 1 end) AS number_losses
+				, round(sum(case when total_points = 3 then 1 end) / count(total_points) * 100, 0) win_pct
 			FROM (
 				SELECT 
 					blog_team.id
@@ -375,6 +378,7 @@ class Game(models.Model):
 			data['number_losses'].append(info.number_losses)
 			data['ovr_season_pts'].append(int(info.ovr_season_pts or 0))
 			data['GA'].append(int(info.GA or 0))
+			data['win_pct'].append(int(info.win_pct or 0)) #adding or 0 prevents NoneType error.
 		return data
 
 	def get_season_game_data():
@@ -456,6 +460,7 @@ class Game(models.Model):
 		, sum(result) total_points
 		, sum(goal_diff) GD
 		, count(result) games
+		, round(sum(number_wins) / count(result) * 100, 0) win_pct
 			from (
 			select blog_game.id, t.manager_name as player, te.manager_name as opponent 
 			, your_result result
@@ -469,7 +474,7 @@ class Game(models.Model):
 			inner join blog_team te on blog_game.opponent_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
 			and blog_game.fifa_year_id = (select max(bg.fifa_year_id) from blog_game bg where bg.id = blog_game.id)
-
+			and blog_game.tourney_game = 0
 
 			union all 
 
@@ -485,6 +490,7 @@ class Game(models.Model):
 			inner join blog_team te on blog_game.your_first_name_id = te.id
 			where blog_game.season_number_id in (select blog_season.id from blog_season where special_season_ind <> 1)
 			and blog_game.fifa_year_id = (select max(bg.fifa_year_id) from blog_game bg where bg.id = blog_game.id)
+			and blog_game.tourney_game = 0
 			) stats
 		group by stats.player, stats.opponent
 		'''
@@ -494,7 +500,7 @@ class Game(models.Model):
 		rows = []
 		for row in headtohead_data:
 			r = ({"player": row.id, "opponent": row.opponent, "wins": row.wins, "ties": row.ties, "losses": row.losses
-				, "points": row.total_points, "GD": row.GD, "games": row.games})
+				, "points": row.total_points, "GD": row.GD, "games": row.games, "win_pct": row.win_pct})
 			rows.append(r)
 
 		return rows
