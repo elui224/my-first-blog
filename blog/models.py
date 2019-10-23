@@ -226,17 +226,19 @@ class Player(models.Model):
 	def get_tot_player_data():
 
 		query_player_tot = '''
-		SELECT player.id, fifa_year, player_name, tot_goal, tot_assist 
+		SELECT player.id, player.fifa_year, player.player_name, goal.tot_goal, assist.tot_assist, game.number_games, round(goal.tot_goal/game.number_games,2) goal_per_game, round(assist.tot_assist/game.number_games,2) assist_per_game
 		FROM (
-			SELECT blog_player.id, blog_player.player_name, blog_player.fifa_year_id, blog_year.fifa_year
+			SELECT blog_player.id, blog_player.player_name, blog_player.fifa_year_id, blog_year.fifa_year, blog_player.team_id
 			FROM blog_player
 			INNER JOIN blog_year ON blog_player.fifa_year_id = blog_year.id
 			WHERE player_team_rec_status = 'A'
+			and blog_player.fifa_year_id = (select max(id) from blog_year)
 			) player
 		LEFT JOIN
 		(
 			SELECT player_name_id, sum(num_goals) tot_goal 
 			FROM blog_goal
+			WHERE blog_goal.fifa_year_id = (select max(id) from blog_year)
 			group by player_name_id
 		) goal
 		ON player.id = goal.player_name_id
@@ -244,9 +246,37 @@ class Player(models.Model):
 		(
 			SELECT player_name_id, sum(num_assists) tot_assist 
 			FROM blog_assist
+			WHERE blog_assist.fifa_year_id = (select max(id) from blog_year)
 			group by player_name_id
 		) assist
-		ON player.id = assist.player_name_id
+		ON player.id = assist.player_name_id		
+		LEFT JOIN
+		(
+			SELECT team_id, 
+				count(total_points) AS number_games 
+			FROM (
+				SELECT 
+					blog_team.id team_id
+					, blog_team.rec_status
+					, blog_game.fifa_year_id fifa_year
+					, blog_game.your_result AS total_points 
+				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.your_first_name_id) 
+				WHERE blog_team.rec_status = 'A'
+				and blog_game.fifa_year_id = (select max(id) from blog_year)
+
+				UNION ALL 
+
+				SELECT 
+					blog_team.id team_id
+					, blog_team.rec_status
+					, blog_game.fifa_year_id fifa_year
+					, blog_game.opponent_result AS total_points 
+				FROM blog_team LEFT OUTER JOIN blog_game ON (blog_team.id = blog_game.opponent_first_name_id)
+				WHERE blog_team.rec_status = 'A'
+				and blog_game.fifa_year_id = (select max(id) from blog_year)
+			) AGGREGATED 
+			GROUP BY team_id
+		) game on player.team_id = game.team_id
 		order by fifa_year desc, tot_goal desc, player_name
 		'''
 	
@@ -255,7 +285,7 @@ class Player(models.Model):
 		tot_player_data = []
 
 		for row in tot_player_data_query:
-			r = ({"id": row.id, "fifa_year": row.fifa_year, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist})
+			r = ({"id": row.id, "fifa_year": row.fifa_year, "player": row.player_name, "goals": row.tot_goal, "assists": row.tot_assist, "games": row.number_games, "goals per game": row.goal_per_game, "assists per game": row.assist_per_game})
 			tot_player_data.append(r)
 
 		return tot_player_data
