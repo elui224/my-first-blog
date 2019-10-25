@@ -193,8 +193,8 @@ def edit_results(request, pk):
 
     GoalFormSet = inlineformset_factory(Game, Goal, form= GoalForm, formset=BaseGoalFormSet, max_num= 10, extra= 1, can_delete = True) 
     AssistFormSet = inlineformset_factory(Game, Assist, form= AssistForm, formset=BaseAssistFormSet, max_num= 10, extra= 1, can_delete = True) 
-    formset = GoalFormSet()
-    formset_assists = AssistFormSet()
+    formset = GoalFormSet(instance=game)
+    formset_assists = AssistFormSet(instance=game)
 
     if request.method == "POST":
         form = GameForm(request.POST or None, request.FILES, instance=game)
