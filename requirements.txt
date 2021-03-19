@@ -4,7 +4,7 @@ Django==2.2.4
 django-crispy-forms==1.7.2
 django-filter==1.0.2
 django-markdown-deux==1.0.5
-djangorestframework==3.10.2
+djangorestframework==3.11.2
 idna==2.6
 Markdown==2.6.8
 markdown2==2.3.4
