@@ -7,7 +7,7 @@ django-markdown-deux==1.0.5
 djangorestframework==3.10.2
 idna==2.6
 Markdown==2.6.8
-markdown2==2.3.4
+markdown2==2.4.0
 mysqlclient==1.4.4
 olefile==0.44
 Pillow==4.1.0
