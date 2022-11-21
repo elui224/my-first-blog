@@ -5,14 +5,12 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from blog.models import Player, Team, Year
 
-from optparse import make_option
-
 CURRENT_FIFA_YEAR = date.today().year + 1
 
 class Command(BaseCommand):
     '''
     Run command using python manage.py create_player --file=path/to/myfile.csv.
-    For example, python manage.py create_player --file=./blog/file_import/players/drafted_players_2023.csv
+    For example, python3 manage.py create_player --file=./blog/file_import/players/drafted_players_2023.csv
     '''
 
     def add_arguments(self, parser):
